@@ -15,6 +15,10 @@ char** process_lines(char** lines,
     ht_hash_table* labels,
     char** processed_lines);
 
+void assemble_binary(FILE *out_fptr, ht_hash_table *labels, char **lines, int n_lines);
+char* assemble_line(ht_hash_table *labels, char *line);
+
+
 
 int main(int argc, char** argv){
 
@@ -31,12 +35,12 @@ int main(int argc, char** argv){
     }
 
 
+    // Free lines[i] and **lines and destory ht_hash_table 
     
     size_t num_of_lines = 0;
     // get line numbers before malloc
     get_number_lines(fptr, &num_of_lines);
     int good_lines = 0;
-    // Free lines[i] and **lines and destory ht_hash_table 
     char **lines = (char**) malloc(num_of_lines * sizeof(char*));
 
     int current_free_addr = 16;
@@ -56,11 +60,15 @@ int main(int argc, char** argv){
     // put output inside array and save output to file
 
 
-    for(int i =0; i < good_lines; i++)
-        printf("goodline: %s \n", processed_lines[i]);
-        
-    char* s = ht_search(labels, "work");
-    printf("%s", s);
+
+    FILE *out_fptr;
+    if((out_fptr=fopen("tmp", "w")) == NULL){
+        perror("Error");
+        exit(EXIT_FAILURE);
+    }
+
+
+    assemble_binary(out_fptr, labels, processed_lines, good_lines);
 
 
 
@@ -77,7 +85,33 @@ int main(int argc, char** argv){
 
 
 
+void assemble_binary(FILE *out_fptr, ht_hash_table *labels, char **lines, int n_lines){
 
+    for(int i =0; i < n_lines; i++){
+        fprintf (out_fptr, "This is line: %s\n", assemble_line(labels, lines[i]));
+    }
+
+    // Todo:
+    // change assemble_line to return a string
+    // take output from assemble_line and writ it to file
+
+
+}
+
+
+
+char* assemble_line(ht_hash_table *labels, char *line){
+
+    // TODO:
+    // identify instruction type (A|C)
+    // if A call function process_a_instructino
+    // if C call function process_c_instructino
+
+    printf("goodline: %s \n", line);
+    char* s = ht_search(labels, "loop");
+    // printf("%s", s);
+    return s;
+}
 
 
 
@@ -86,9 +120,7 @@ int main(int argc, char** argv){
 void get_number_lines(FILE *fptr, size_t *n){
     int lines = 0;
     char *line = NULL;
-    while ((getline(&line, n, fptr)) != -1) {
-        lines++;
-    }
+    while ((getline(&line, n, fptr)) != -1) { lines++; }
     *n = lines;
     rewind(fptr);
 }
