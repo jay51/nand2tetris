@@ -66,8 +66,10 @@ class Parser():
 class AInstruction():
     def __init__(self, code, parser):
         try:
+            # if selecting memory like (@14034)
             self.address = int(code[1:])
         except ValueError:
+            # if selecting memory like (@SCREEN)
             self.address = parser.resolve_symbol(code[1:])
 
     def __str__(self):
