@@ -4,6 +4,10 @@
 # vim swp files
 *.swp
 
+# python precompiled files
+*.pyc
+
+
 # Object files
 *.o
 *.ko

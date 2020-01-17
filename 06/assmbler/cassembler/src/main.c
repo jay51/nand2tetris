@@ -27,9 +27,11 @@ char* process_a_instruction(ht_hash_table *labels,
     char *instruction);
 
 char* process_c_instruction(ht_hash_table *labels, char *instruction);
-
 char* convert_to_bin(char* a);
 
+
+ht_hash_table *variables;
+int current_free_addr;
 
 int main(int argc, char** argv){
 
@@ -49,6 +51,9 @@ int main(int argc, char** argv){
     // define_comp();
     // define_dest();
     // define_jump();
+
+    variables = ht_new();
+    current_free_addr = 16;
     
 
     // Free lines[i] and **lines and destory ht_hash_table 
@@ -58,7 +63,6 @@ int main(int argc, char** argv){
     int good_lines = 0;
     char **lines = (char**) malloc(num_of_lines * sizeof(char*));
 
-    int current_free_addr = 16;
     char **processed_lines =(char**) malloc(num_of_lines * sizeof(char*)); 
     ht_hash_table* labels = ht_new();
 
@@ -71,13 +75,11 @@ int main(int argc, char** argv){
         processed_lines);
 
 
-
     // TODO:
     // file reading and parseing is. DONE
-    // write the assemble_line function
-    // define instruction type and translate instruction
+    // write the assemble_line function. DONE
+    // define instruction type and translate instruction. DONE
     // put output inside array and save output to file
-
 
 
     FILE *out_fptr;
@@ -150,10 +152,14 @@ void assemble_binary(
     for(int i =0; i < n_lines; i++){
         // TODO:
         // if C call function process_c_instructino
-        if(strncmp(lines[i], "@", 1) == 0)
-            fprintf (out_fptr, "0%s\n", process_a_instruction(labels, predefined_mem, lines[i]));
-        // else
+        if(strncmp(lines[i], "@", 1) == 0){
+            char* opcode = process_a_instruction(labels, predefined_mem, lines[i]);
+            fprintf (out_fptr, "0%s\n", opcode);
+            free(opcode);
+        } else {
             // fprintf (out_fptr, "This is line: %s\n", process_c_instruction(labels, lines[i]));
+        }
+        
 
     }
 }
@@ -174,7 +180,16 @@ char* process_a_instruction(
             return convert_to_bin(ht_search(predefined_mem, instruction+1));
         } else{
             // this is a variable, in that case we store it in the next avaliable memory addr
-            return "fuck you";
+            if(ht_search(variables, instruction+1)){
+                return convert_to_bin(ht_search(variables, instruction+1));
+            }
+            else {
+                char *addr = (char*) malloc(6 * sizeof(char)+1);
+                sprintf(addr, "%d", current_free_addr++);
+                printf("addr: %s\n", addr);
+                ht_insert(variables, instruction+1, addr);
+                return convert_to_bin(addr);
+            }
         }
         
     } else
