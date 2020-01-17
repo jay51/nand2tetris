@@ -8,7 +8,6 @@ class Parser():
 
     # iter of all free memory starting from 16 to address of SCREEN
     free_addresses = iter(range(16, PREDEFINED_MEM['SCREEN']-1))
-    next_address = lambda: next(Parser.free_addresses) # get the next address
 
     def __init__(self, filename):
         self.filename = filename
@@ -33,6 +32,10 @@ class Parser():
                 lines.append(_line)
             # else: it's just a whitespace/comment line (ignore)
         return lines
+
+    @staticmethod
+    def next_address():
+        return next(Parser.free_addresses) # get the next address
 
     def resolve_symbol(self, symbol):
         """ return memory address of symbol"""
