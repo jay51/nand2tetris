@@ -103,5 +103,3 @@ ht_hash_table* define_jump(void){
 
     return ht;
 }
-
-
