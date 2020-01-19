@@ -13,3 +13,4 @@ D=D+A
 @0
 M=D
 @SCREEN
+D;JMP

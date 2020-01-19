@@ -26,11 +26,18 @@ char* process_a_instruction(ht_hash_table *labels,
     ht_hash_table *predefined_mem,
     char *instruction);
 
-char* process_c_instruction(ht_hash_table *labels, char *instruction);
+char* process_c_instruction(ht_hash_table *labels,
+    ht_hash_table *predefined_mem,
+    char *instruction);
+
 char* convert_to_bin(char* a);
 
 
+ht_hash_table *comp_table;
+ht_hash_table *dest_table;
+ht_hash_table *jump_table;
 ht_hash_table *variables;
+
 int current_free_addr;
 
 int main(int argc, char** argv){
@@ -48,9 +55,9 @@ int main(int argc, char** argv){
     }
 
     ht_hash_table *predefined_mem = define_predefined_mem();
-    // define_comp();
-    // define_dest();
-    // define_jump();
+    comp_table = define_comp();
+    dest_table = define_dest();
+    jump_table = define_jump();
 
     variables = ht_new();
     current_free_addr = 16;
@@ -79,11 +86,12 @@ int main(int argc, char** argv){
     // file reading and parseing is. DONE
     // write the assemble_line function. DONE
     // define instruction type and translate instruction. DONE
-    // put output inside array and save output to file
+    // put output to file DONE
+    // refactor the code (it's really bad)
 
 
     FILE *out_fptr;
-    if((out_fptr=fopen("tmp", "wb")) == NULL){
+    if((out_fptr=fopen("out", "wb")) == NULL){
         perror("Error");
         exit(EXIT_FAILURE);
     }
@@ -97,15 +105,6 @@ int main(int argc, char** argv){
         good_lines);
 
 
-
-    /*
-    ht_hash_table* ht = ht_new();
-    ht_insert(ht, "key",  "val");
-    ht_delete(ht, "one");
-    char* s = ht_search(ht, "one");
-    printf("s: %s \n", s);
-    ht_hash_table* ht = define_predefined_mem();
-    */
     return 0;
 }
 
@@ -150,17 +149,16 @@ void assemble_binary(
     // printf("%s", s);
 
     for(int i =0; i < n_lines; i++){
-        // TODO:
-        // if C call function process_c_instructino
+        char* opcode;
         if(strncmp(lines[i], "@", 1) == 0){
-            char* opcode = process_a_instruction(labels, predefined_mem, lines[i]);
+            opcode = process_a_instruction(labels, predefined_mem, lines[i]);
             fprintf (out_fptr, "0%s\n", opcode);
-            free(opcode);
         } else {
-            // fprintf (out_fptr, "This is line: %s\n", process_c_instruction(labels, lines[i]));
+            opcode = process_c_instruction(labels, predefined_mem, lines[i]);
+            printf("instruction: %s \n", lines[i]);
+            fprintf (out_fptr, "%s\n", opcode);
         }
-        
-
+        free(opcode);
     }
 }
 
@@ -186,7 +184,6 @@ char* process_a_instruction(
             else {
                 char *addr = (char*) malloc(6 * sizeof(char)+1);
                 sprintf(addr, "%d", current_free_addr++);
-                printf("addr: %s\n", addr);
                 ht_insert(variables, instruction+1, addr);
                 return convert_to_bin(addr);
             }
@@ -197,12 +194,42 @@ char* process_a_instruction(
 }
 
 
-char* process_c_instruction(ht_hash_table *labels, char *instruction){
+char* process_c_instruction(
+    ht_hash_table *labels,
+    ht_hash_table *predefined_mem,
+    char *instruction
+    ){
 
-    if(!isdigit(*instruction))
-        return "label";
-    else
-        return "not a label";
+
+    char comp[5];
+    char dest[2];
+    char jump[4];
+    char* opcode = malloc(16 * sizeof(char) + 1);
+    memset(comp, '\0', sizeof(comp));
+    memset(dest, '\0', sizeof(dest));
+    memset(jump, '\0', sizeof(jump));
+
+    memset(opcode, '1', sizeof(char) * 3);
+    opcode[3] = '\0';
+
+    if(instruction[1] == '='){
+        strncpy(dest, instruction, 1); 
+        strncpy(comp, instruction+2, 3); 
+
+        strcat(opcode, ht_search(comp_table, comp));
+        strcat(opcode, ht_search(dest_table, dest));
+        strcat(opcode, ht_search(jump_table, ""));
+    } else {
+
+        strncpy(comp, instruction, 1); 
+        strncpy(jump, instruction+2, 3); 
+
+        strcat(opcode, ht_search(comp_table, comp));
+        strcat(opcode, ht_search(dest_table, ""));
+        strcat(opcode, ht_search(jump_table, jump));
+    }
+
+    return opcode;
 }
 
 
@@ -236,23 +263,29 @@ char** process_lines(
 
     for(int i = 0; i < num_of_lines; i++){
 
-        if(strncmp(lines[i], "//", 2) != 0 && strcmp(lines[i], "\r\n") != 0){
+        if(strncmp(lines[i], "//", 2) != 0 && strcmp(lines[i], "\n") != 0){
 
             size_t length = strlen(lines[i]);
             if(strncmp(lines[i], "(", 1) == 0){
 
                 char *buf = malloc(sizeof(char) * length);
-                strncpy(buf, lines[i]+1, length-4);
+                memset(buf, '\0', sizeof(buf));
+                strncpy(buf, lines[i]+1, length-3);
 
-                char *line_num = (char*) malloc(4 * sizeof(int)+1);
+                char *line_num = (char*) malloc(6 * sizeof(char)+1);
                 sprintf(line_num, "%d", (*line_count)+1);
                 ht_insert(labels, buf, line_num);
 
             } else {
-                // processed_lines[(*line_count)++] = strdup(lines[i]);
+
                 char *cpy = malloc(sizeof(char) * length);
-                strncpy(cpy, lines[i], length-2);
+                strncpy(cpy, lines[i], length-1);
+                // printf("instruction:%s \n", cpy);
+                // for(int i = 0; i < length; i++)
+                    // printf("char: %d", cpy[i]);
+                // printf("\n");
                 processed_lines[(*line_count)++] = cpy;
+
             }
         }
     }

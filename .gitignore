@@ -7,6 +7,7 @@
 # python precompiled files
 *.pyc
 
+assembler
 
 # Object files
 *.o
