@@ -4,41 +4,33 @@
 #include<errno.h>
 #include<assert.h>
 #include<ctype.h>
-
 #include "hash_table.h"
 #include "const.h"
 
+
 void read_lines(FILE* fptr, char** arr);
 void get_number_lines(FILE* fptr, size_t* n);
-char** process_lines(char** lines,
-    int num_of_lines,
-    int* line_count,
-    ht_hash_table* labels,
-    char** processed_lines);
 
-void assemble_binary(FILE *out_fptr,
-    ht_hash_table *labels,
-    ht_hash_table *predefined_mem,
-    char **lines,
-    int n_lines);
+char** process_lines(char** lines, int num_of_lines, int* line_count, char** processed_lines);
+void assemble_binary(FILE *out_fptr, char **lines, int n_lines);
 
-char* process_a_instruction(ht_hash_table *labels,
-    ht_hash_table *predefined_mem,
-    char *instruction);
-
-char* process_c_instruction(ht_hash_table *labels,
-    ht_hash_table *predefined_mem,
-    char *instruction);
+char* process_a_instruction(ht_hash_table *labels, char *instruction);
+char* process_c_instruction(ht_hash_table *labels, char *instruction);
 
 char* convert_to_bin(char* a);
 
-
+ht_hash_table *predefined_mem; 
+ht_hash_table* labels;
 ht_hash_table *comp_table;
 ht_hash_table *dest_table;
 ht_hash_table *jump_table;
 ht_hash_table *variables;
 
-int current_free_addr;
+int good_lines = 0;
+size_t num_of_lines = 0;
+int current_free_addr = 16;
+
+
 
 int main(int argc, char** argv){
 
@@ -54,40 +46,20 @@ int main(int argc, char** argv){
         exit(EXIT_FAILURE);
     }
 
-    ht_hash_table *predefined_mem = define_predefined_mem();
+    predefined_mem = define_predefined_mem();
     comp_table = define_comp();
     dest_table = define_dest();
     jump_table = define_jump();
-
     variables = ht_new();
-    current_free_addr = 16;
+    labels = ht_new();
     
-
-    // Free lines[i] and **lines and destory ht_hash_table 
-    size_t num_of_lines = 0;
     // get line numbers before malloc
     get_number_lines(fptr, &num_of_lines);
-    int good_lines = 0;
     char **lines = (char**) malloc(num_of_lines * sizeof(char*));
+    read_lines(fptr, lines);
 
     char **processed_lines =(char**) malloc(num_of_lines * sizeof(char*)); 
-    ht_hash_table* labels = ht_new();
-
-    read_lines(fptr, lines);
-    process_lines(
-        lines, 
-        num_of_lines,
-        &good_lines,
-        labels,
-        processed_lines);
-
-
-    // TODO:
-    // file reading and parseing is. DONE
-    // write the assemble_line function. DONE
-    // define instruction type and translate instruction. DONE
-    // put output to file DONE
-    // refactor the code (it's really bad)
+    process_lines(lines, num_of_lines, &good_lines, processed_lines);
 
 
     FILE *out_fptr;
@@ -96,15 +68,23 @@ int main(int argc, char** argv){
         exit(EXIT_FAILURE);
     }
 
+    assemble_binary(out_fptr, processed_lines, good_lines);
 
-    assemble_binary(
-        out_fptr,
-        labels,
-        predefined_mem,
-        processed_lines,
-        good_lines);
+    // CLEAN UP
+    for(int i = 0; i < num_of_lines; i++)
+        free(lines[i]);
 
+    for(int i = 0; i < good_lines; i++)
+        free(processed_lines[i]);
 
+    free(lines);
+    free(processed_lines);
+    ht_del_hash_table(labels);
+    ht_del_hash_table(variables);
+
+    ht_del_hash_table(comp_table);
+    ht_del_hash_table(dest_table);
+    ht_del_hash_table(jump_table);
     return 0;
 }
 
@@ -136,25 +116,15 @@ char* convert_to_bin(char* a) {
 }
 
 
-
-void assemble_binary(
-    FILE *out_fptr,
-    ht_hash_table *labels,
-    ht_hash_table *predefined_mem,
-    char **lines,
-    int n_lines
-    ){
-
-    char* s = ht_search(labels, "loop");
-    // printf("%s", s);
+void assemble_binary(FILE *out_fptr, char **lines, int n_lines){
 
     for(int i =0; i < n_lines; i++){
         char* opcode;
         if(strncmp(lines[i], "@", 1) == 0){
-            opcode = process_a_instruction(labels, predefined_mem, lines[i]);
+            opcode = process_a_instruction(labels, lines[i]);
             fprintf (out_fptr, "0%s\n", opcode);
         } else {
-            opcode = process_c_instruction(labels, predefined_mem, lines[i]);
+            opcode = process_c_instruction(labels, lines[i]);
             printf("instruction: %s \n", lines[i]);
             fprintf (out_fptr, "%s\n", opcode);
         }
@@ -163,12 +133,8 @@ void assemble_binary(
 }
 
 
-// DON'T START A LABEL WITH A NUMBER! 
-char* process_a_instruction(
-    ht_hash_table *labels,
-    ht_hash_table *predefined_mem,
-    char *instruction
-    ){
+// DON'T START A VARIABLE WITH A NUMBER! 
+char* process_a_instruction( ht_hash_table *labels, char *instruction){
 
     if(!isdigit(instruction[1])){
 
@@ -194,12 +160,7 @@ char* process_a_instruction(
 }
 
 
-char* process_c_instruction(
-    ht_hash_table *labels,
-    ht_hash_table *predefined_mem,
-    char *instruction
-    ){
-
+char* process_c_instruction( ht_hash_table *labels, char *instruction){
 
     char comp[5];
     char dest[2];
@@ -234,7 +195,6 @@ char* process_c_instruction(
 
 
 
-
 void get_number_lines(FILE *fptr, size_t *n){
     int lines = 0;
     char *line = NULL;
@@ -253,37 +213,25 @@ void read_lines(FILE *fptr, char** arr){
 }
 
 
-char** process_lines(
-    char** lines,
-    int num_of_lines,
-    int* line_count,
-    ht_hash_table* labels,
-    char** processed_lines
-    ){
+char** process_lines( char** lines, int num_of_lines, int* line_count, char** processed_lines){
 
     for(int i = 0; i < num_of_lines; i++){
-
         if(strncmp(lines[i], "//", 2) != 0 && strcmp(lines[i], "\n") != 0){
-
             size_t length = strlen(lines[i]);
-            if(strncmp(lines[i], "(", 1) == 0){
 
+            if(strncmp(lines[i], "(", 1) == 0){
                 char *buf = malloc(sizeof(char) * length);
                 memset(buf, '\0', sizeof(buf));
                 strncpy(buf, lines[i]+1, length-3);
 
                 char *line_num = (char*) malloc(6 * sizeof(char)+1);
+                memset(buf, '\0', sizeof(line_num));
                 sprintf(line_num, "%d", (*line_count)+1);
                 ht_insert(labels, buf, line_num);
 
             } else {
-
                 char *cpy = malloc(sizeof(char) * length);
                 strncpy(cpy, lines[i], length-1);
-                // printf("instruction:%s \n", cpy);
-                // for(int i = 0; i < length; i++)
-                    // printf("char: %d", cpy[i]);
-                // printf("\n");
                 processed_lines[(*line_count)++] = cpy;
 
             }
