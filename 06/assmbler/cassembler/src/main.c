@@ -14,8 +14,8 @@ void get_number_lines(FILE* fptr, size_t* n);
 char** process_lines(char** lines, int num_of_lines, int* line_count, char** processed_lines);
 void assemble_binary(FILE *out_fptr, char **lines, int n_lines);
 
-char* process_a_instruction(ht_hash_table *labels, char *instruction);
-char* process_c_instruction(ht_hash_table *labels, char *instruction);
+char* process_a_instruction(char *instruction);
+char* process_c_instruction(char *instruction);
 
 char* convert_to_bin(char* a);
 
@@ -121,10 +121,10 @@ void assemble_binary(FILE *out_fptr, char **lines, int n_lines){
     for(int i =0; i < n_lines; i++){
         char* opcode;
         if(strncmp(lines[i], "@", 1) == 0){
-            opcode = process_a_instruction(labels, lines[i]);
+            opcode = process_a_instruction(lines[i]);
             fprintf (out_fptr, "0%s\n", opcode);
         } else {
-            opcode = process_c_instruction(labels, lines[i]);
+            opcode = process_c_instruction(lines[i]);
             printf("instruction: %s \n", lines[i]);
             fprintf (out_fptr, "%s\n", opcode);
         }
@@ -134,7 +134,7 @@ void assemble_binary(FILE *out_fptr, char **lines, int n_lines){
 
 
 // DON'T START A VARIABLE WITH A NUMBER! 
-char* process_a_instruction( ht_hash_table *labels, char *instruction){
+char* process_a_instruction(char *instruction){
 
     if(!isdigit(instruction[1])){
 
@@ -160,7 +160,7 @@ char* process_a_instruction( ht_hash_table *labels, char *instruction){
 }
 
 
-char* process_c_instruction( ht_hash_table *labels, char *instruction){
+char* process_c_instruction(char *instruction){
 
     char comp[5];
     char dest[2];
@@ -181,7 +181,6 @@ char* process_c_instruction( ht_hash_table *labels, char *instruction){
         strcat(opcode, ht_search(dest_table, dest));
         strcat(opcode, ht_search(jump_table, ""));
     } else {
-
         strncpy(comp, instruction, 1); 
         strncpy(jump, instruction+2, 3); 
 
