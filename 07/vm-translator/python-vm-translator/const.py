@@ -1,5 +1,30 @@
 
 arithmetic_ops = {
+    "add": """
+        @SP
+        M=M-1   // SP--
+        A=M     // jump into location at SP
+        D=M     // D = RAM[A] 5
+        
+        @R12
+        M=D     // store first item on stack
+
+        @SP
+        M=M-1   // SP--
+        A=M     // jump into location at SP
+        D=M     // D = RAM[A] 5
+        
+        @R12
+        D=D+M   // add the two items on the stack
+
+
+        @SP     // store back on stack
+        A=M     // jump to location of SP
+        M=D     // RAM[*SP] = D
+
+        @SP
+        M=M+1   // SP++
+    """,
     "sub": """
         some ops
     """
@@ -12,7 +37,7 @@ pop_instruction = {
         @LCL
         D=D+M   // D = LCL+i
         
-        @R0
+        @R12
         M=D     // RAM[R0] = D
         
         @SP
@@ -20,7 +45,7 @@ pop_instruction = {
         A=M     // jump into location at SP
         D=M     // D = RAM[A] 5
         
-        @R0
+        @R12
         A=M     // jump to location at LCL+i
         M=D     // LCL[i] = D
     """,
@@ -73,7 +98,14 @@ push_instruction = {
 
     "constant": """
         @%s
-        some stuff
+        D=A     // store n in D
+
+        @SP
+        A=M     // jump to location of SP
+        M=D     // RAM[*SP] = D
+
+        @SP
+        M=M+1   // SP++
     """,
     "temp": """
         @%s

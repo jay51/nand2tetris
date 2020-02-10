@@ -145,8 +145,6 @@ class Parser:
 
 
 
-
-
 def vm_translator(line):
     
     print(line)
