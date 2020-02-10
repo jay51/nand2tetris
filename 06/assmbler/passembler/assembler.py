@@ -4,8 +4,12 @@ import collections
 import sys
 from const import COMP, PREDEFINED_MEM, JUMP, DEST
 
-class Parser():
 
+# TODO:
+#   assembler generate no output when you add comments at the end of an instruction
+
+
+class Parser():
     # iter of all free memory starting from 16 to address of SCREEN
     free_addresses = iter(range(16, PREDEFINED_MEM['SCREEN']-1))
 

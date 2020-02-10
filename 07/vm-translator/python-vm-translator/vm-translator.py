@@ -135,7 +135,7 @@ class Parser:
             
 
     def assemble_file(self, func, f_name=None):
-        file_name = f_name if f_name else self.file_name + ".asm"
+        file_name = f_name if f_name else self.file_name.split(".")[0] + ".asm"
         with open(file_name, "w") as f:
             for line in self.lines:
                 f.write(func(line))
@@ -152,10 +152,10 @@ def vm_translator(line):
 
     try:
         if line[0].upper() == "PUSH":
-            translated_line = push_instruction[line[1]] %(line[2])
+            translated_line = push_instruction[line[1]].format(line[2])
 
         elif line[0].upper() == "POP":
-            translated_line = pop_instruction[line[1]] %(line[2])
+            translated_line = pop_instruction[line[1]].format(line[2])
             
         else:
             translated_line = arithmetic_ops[line[0]]

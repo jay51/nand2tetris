@@ -1,77 +1,113 @@
 
 arithmetic_ops = {
     "add": """
+// SP--
         @SP
-        M=M-1   // SP--
-        A=M     // jump into location at SP
-        D=M     // D = RAM[A] 5
+        M=M-1   
+
+// JUMP INTO LOCATION AT SP
+        A=M 
+// SET D = RAM[A]
+        D=M 
         
+// STORE D IN R12
         @R12
-        M=D     // store first item on stack
+        M=D 
 
+// SP--
         @SP
-        M=M-1   // SP--
-        A=M     // jump into location at SP
-        D=M     // D = RAM[A] 5
-        
+        M=M-1 
+
+// JUMP INTO LOCATION AT SP
+        A=M     
+// SET D = RAM[A]
+        D=M     
+
+// ADD THE TWO NUMBERS 
         @R12
-        D=D+M   // add the two items on the stack
+        D=D+M   
 
-
-        @SP     // store back on stack
-        A=M     // jump to location of SP
-        M=D     // RAM[*SP] = D
-
+// STORE BACK ON STACK
         @SP
-        M=M+1   // SP++
+        A=M
+        M=D
+
+// SP++
+        @SP
+        M=M+1
     """,
-    "sub": """
+    "neg": """
+        some ops
+    """,
+    "eq": """
+        some ops
+    """,
+    "gt": """
+        some ops
+    """,
+    "lt": """
+        some ops
+    """,
+    "and": """
+        some ops
+    """,
+    "or": """
+        some ops
+    """,
+    "not": """
         some ops
     """
 }
 
 pop_instruction = {
     "local": """
-        @%s
+// D = LCL+i
+        @{}
         D=A
         @LCL
-        D=D+M   // D = LCL+i
+        D=D+M   
         
+// SET RAM[R12] = D
         @R12
-        M=D     // RAM[R0] = D
-        
+        M=D     
+
+// SP--
         @SP
-        M=M-1   // SP--
-        A=M     // jump into location at SP
-        D=M     // D = RAM[A] 5
+        M=M-1
+// JUMP INTO LOCATION AT SP
+        A=M
+// D = RAM[A]
+        D=M
         
+// JUMP TO LOCATION AT LCL+i
         @R12
-        A=M     // jump to location at LCL+i
-        M=D     // LCL[i] = D
+        A=M
+// LCL[i] = D
+        M=D
     """,
     "argument": """
-        @%s
+        @{}
         some stuff
     """,
 
     "temp": """
-        @%s
+        @{}
         some stuff
     """,
     "static": """
-        @%s
+        @{}
         some stuff
     """,
     "pointer": """
-        @%s
+        @{}
         some stuff
     """,
     "that": """
-        @%s
+        @{}
         some stuff
     """,
     "this": """
-        @%s
+        @{}
         some stuff
     """
 
@@ -80,51 +116,60 @@ pop_instruction = {
 
 push_instruction = {
     "local": """
-        @%s
-        D=A     // D=i
+// D=i
+        @{}
+        D=A     
 
+// A=LCL+i JUMP TO THAT MEMORY AND STORE VALUE IN D
         @LCL
-        A=D+M   // A=LCL+i jump to that memory
-        D=M     // D=LCL[i]
+        A=D+M
+        D=M
 
+// JUMP TO LOCATION OF SP
         @SP
-        A=M     // jump to location of SP
-        M=D     // RAM[*SP] = D
+        A=M
 
+// SET RAM[*SP] = D
+        M=D
+
+// SP++
         @SP
-        M=M+1   // SP++
+        M=M+1
 
     """,
 
     "constant": """
-        @%s
-        D=A     // store n in D
+// D=i
+        @{}
+        D=A
 
+// JUMP TO LOCATION OF SP AND STORE i THERE
         @SP
-        A=M     // jump to location of SP
-        M=D     // RAM[*SP] = D
+        A=M
+        M=D
 
+// SP++
         @SP
-        M=M+1   // SP++
+        M=M+1
     """,
     "temp": """
-        @%s
+        @{}
         some stuff
     """,
     "static": """
-        @%s
+        @{}
         some stuff
     """,
     "pointer": """
-        @%s
+        @{}
         some stuff
     """,
     "that": """
-        @%s
+        @{}
         some stuff
     """,
     "this": """
-        @%s
+        @{}
         some stuff
     """
 }
