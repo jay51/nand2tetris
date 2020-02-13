@@ -86,17 +86,55 @@ pop_instruction = {
         M=D
     """,
     "argument": """
+// D = ARG+i
         @{}
-        some stuff
-    """,
+        D=A
+        @ARG
+        D=D+M   
+        
+// SET RAM[R12] = D
+        @R12
+        M=D     
 
+// SP--
+        @SP
+        M=M-1
+// JUMP INTO LOCATION AT SP
+        A=M
+// D = RAM[A]
+        D=M
+        
+// JUMP TO LOCATION AT ARG+i
+        @R12
+        A=M
+// ARG[i] = D
+        M=D
+    """,
     "temp": """
+// SP--
+        @SP
+        M=M-1
+// JUMP INTO LOCATION AT SP
+        A=M
+// D = RAM[A]
+        D=M
+
+// TEMP+i = D
         @{}
-        some stuff
+        M=D
     """,
     "static": """
+// SP--
+        @SP
+        M=M-1
+// JUMP INTO LOCATION AT SP
+        A=M
+// D = RAM[A]
+        D=M
+
+// STATIC+i = D
         @{}
-        some stuff
+        M=D
     """,
     "pointer": """
         @{}
@@ -137,7 +175,6 @@ push_instruction = {
         M=M+1
 
     """,
-
     "constant": """
 // D=i
         @{}
@@ -153,12 +190,30 @@ push_instruction = {
         M=M+1
     """,
     "temp": """
+// D = TEMP+i
         @{}
-        some stuff
+        D=M
+
+// JUMP INTO LOCATION AT SP
+        @SP
+        A=M
+        M=D
+// SP++
+        @SP
+        M=M+1
     """,
     "static": """
+// D = STATIC+i
         @{}
-        some stuff
+        D=M
+
+// JUMP INTO LOCATION AT SP
+        @SP
+        A=M
+        M=D
+// SP++
+        @SP
+        M=M+1
     """,
     "pointer": """
         @{}

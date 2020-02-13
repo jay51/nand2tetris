@@ -152,13 +152,24 @@ def vm_translator(line):
 
     try:
         if line[0].upper() == "PUSH":
-            translated_line = push_instruction[line[1]].format(line[2])
+            if line[1] == "temp":
+                # TEMP START AT RAM[5]
+                translated_line = push_instruction[line[1]].format(line[2] + 5)
+            elif line[1] == "static":
+                # STATIC START AT RAM[5]
+                translated_line = push_instruction[line[1]].format(line[2] + 16)
 
         elif line[0].upper() == "POP":
-            translated_line = pop_instruction[line[1]].format(line[2])
+            if line[1] == "temp":
+                # TEMP START AT RAM[5]
+                translated_line = push_instruction[line[1]].format(line[2] + 5)
+            elif line[1] == "static":
+                # STATIC START AT RAM[5]
+                translated_line = push_instruction[line[1]].format(line[2] + 16)
             
         else:
             translated_line = arithmetic_ops[line[0]]
+
     except Exception as e:
         print(e)
         sys.stderr.write("Error: Wrong instruction %s" %line[0])
