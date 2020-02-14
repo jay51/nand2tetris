@@ -154,6 +154,13 @@ D=0
     """
 }
 
+
+
+// TODO: 
+//  refactore the pointer segemnt (pass this and that using python)
+//  generate a rendom number with each label
+
+
 pop_instruction = {
     "local": """
 // D = LCL+i
@@ -232,19 +239,91 @@ pop_instruction = {
         M=D
     """,
     "pointer": """
+
+// i = 0(THIS) OR i = 1(THAT)
         @{}
-        some stuff
+        D=A
+// IF i = 0; (i - 1) != 0 ELSE (i - 1) == 0
+        D=D-1
+        @THIS.SEGMENT
+// IF i == 0 JUMP TO THIS.SEGMENT
+        D;JNE
+
+// IF ABOVE CODE DOSEN'T JUMP THAN JUMP TO THAT.SEGMENT
+        @THAT.SEGMENT
+        0;JMP
+
+
+        (THIS.SEGMENT)
+// SP--
+        @SP
+        M=M-1
+        A=M
+        D=M
+        
+        @THIS
+        M=D
+
+
+        (THAT.SEGMENT)
+// SP--
+        @SP
+        M=M-1
+        A=M
+        D=M
+        
+        @THAT
+        M=D
     """,
     "that": """
         @{}
-        some stuff
+        D=A
+
+        @THAT
+        D=D+M
+
+        @R13
+        M=D
+
+// SP--
+        @SP
+        M=M-1
+
+        A=M
+        D=M
+
+// STORE VALUE ON STACK IN  i+THAT (RAM[i+THAT]=*SP)
+        @R13
+        A=M
+        M=D
+
     """,
     "this": """
         @{}
-        some stuff
+        D=A
+
+        @THIS
+        D=D+M
+
+        @R13
+        M=D
+
+// SP--
+        @SP
+        M=M-1
+
+        A=M
+        D=M
+
+// STORE VALUE ON STACK IN  i+THIS (RAM[i+THIS]=*SP)
+        @R13
+        A=M
+        M=D
     """
 
 }
+
+
 
 
 push_instruction = {
@@ -311,15 +390,68 @@ push_instruction = {
         M=M+1
     """,
     "pointer": """
+// i = 0(THIS) OR i = 1(THAT)
         @{}
-        some stuff
+        D=A
+// IF i = 0; (i - 1) != 0 ELSE (i - 1) == 0
+        D=D-1
+        @THIS.SEGMENT
+// IF i == 0 JUMP TO THIS.SEGMENT
+        D;JNE
+
+        (THAT.SEGMENT)
+        @THAT
+        D=M
+        @POINTER.PUSH_RESULT
+        0;JMP
+
+
+        (THIS.SEGMENT)
+        @THIS
+        D=M
+
+
+        (POINTER.PUSH_RESULT)
+// STORE BACK ON STACK
+        @SP
+        A=M
+        M=D
+// SP++
+        @SP
+        M=M+1 
     """,
     "that": """
         @{}
-        some stuff
+        D=A
+
+        @THAT
+        A=D+M
+        D=M
+
+
+        @SP
+        A=M
+        M=D
+        
+// SP++
+        @SP
+        M=M+1
     """,
     "this": """
         @{}
-        some stuff
+        D=A
+
+        @THIS
+        A=D+M
+        D=M
+
+
+        @SP
+        A=M
+        M=D
+        
+// SP++
+        @SP
+        M=M+1
     """
 }

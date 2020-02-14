@@ -7,6 +7,11 @@
 # python precompiled files
 *.pyc
 
+# hack and vm files
+*.asm
+*.vm
+
+
 assembler
 *out
 
