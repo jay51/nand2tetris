@@ -10,8 +10,8 @@ arithmetic_ops = {
 // SET D = RAM[A]
         D=M 
         
-// STORE D IN R12
-        @R12
+// STORE D IN R13
+        @R13
         M=D 
 
 // SP--
@@ -24,7 +24,7 @@ arithmetic_ops = {
         D=M     
 
 // ADD THE TWO NUMBERS 
-        @R12
+        @R13
         D=D+M   
 
 // STORE BACK ON STACK
@@ -36,11 +36,106 @@ arithmetic_ops = {
         @SP
         M=M+1
     """,
+    "sub": """
+// SP--
+        @SP
+        M=M-1   
+
+// JUMP INTO LOCATION AT SP
+        A=M 
+// SET D = RAM[A]
+        D=M 
+        
+// STORE D IN R13, DON'T USE TEMP
+        @R13
+        M=D 
+
+// SP--
+        @SP
+        M=M-1 
+
+// JUMP INTO LOCATION AT SP
+        A=M     
+// SET D = RAM[A]
+        D=M     
+
+// SUB THE TWO NUMBERS 
+        @R13
+        D=M-D   
+
+// STORE BACK ON STACK
+        @SP
+        A=M
+        M=D
+
+// SP++
+        @SP
+        M=M+1
+    """,
     "neg": """
-        some ops
+        @SP
+        M=M-1
+        A=M
+
+// NEG INSTRUCTION
+        D=-M
+
+// STORE BACK ON STACK
+        @SP
+        A=M
+        M=D
+// SP++
+        @SP
+        M=M+1 
     """,
     "eq": """
-        some ops
+    
+// SP--
+        @SP
+        M=M-1   
+
+// JUMP INTO LOCATION AT SP
+        A=M 
+// SET D = RAM[A]
+        D=M 
+        
+// STORE D IN R13, DON'T USE TEMP
+        @R13
+        M=D 
+
+// SP--
+        @SP
+        M=M-1 
+
+// JUMP INTO LOCATION AT SP
+        A=M     
+// SET D = RAM[A]
+        D=M     
+
+        @R13
+        D=D-M
+
+// JUMP TO NOT_EQUAL IF D != 0
+        @NOT_EQUAL
+        D;JNE
+
+
+// JUMP IF EQUAL
+        @PUSH_RESULT
+        0;JMP
+
+(NOT_EQUAL)
+D=0
+
+
+(PUSH_RESULT)
+// STORE BACK ON STACK
+        @SP
+        A=M
+        M=D
+// SP++
+        @SP
+        M=M+1
     """,
     "gt": """
         some ops
