@@ -1,4 +1,10 @@
 
+
+// TODO: 
+//  refactore the pointer segemnt (pass this and that using python)
+//  generate a rendom number with each label
+
+
 arithmetic_ops = {
     "add": """
 // SP--
@@ -121,14 +127,16 @@ arithmetic_ops = {
 
 
 // JUMP IF EQUAL
+        D=-1
         @PUSH_RESULT
         0;JMP
 
-(NOT_EQUAL)
-D=0
+
+        ({}-NOT_EQUAL)
+        D=0
 
 
-(PUSH_RESULT)
+        (PUSH_RESULT)
 // STORE BACK ON STACK
         @SP
         A=M
@@ -138,27 +146,213 @@ D=0
         M=M+1
     """,
     "gt": """
-        some ops
+    
+// SP--
+        @SP
+        M=M-1   
+
+// JUMP INTO LOCATION AT SP
+        A=M 
+// SET D = RAM[A]
+        D=M 
+        
+// STORE D IN R13, DON'T USE TEMP
+        @R13
+        M=D 
+
+// SP--
+        @SP
+        M=M-1 
+
+// JUMP INTO LOCATION AT SP
+        A=M     
+// SET D = RAM[A]
+        D=M     
+
+        @R13
+        D=D-M
+
+// JUMP IF D > 0
+        @GREATER-THAN
+        D;JGT
+
+
+        D=0
+        @PUSH_RESULT
+        0;JMP
+
+        (GREATER-THAN)
+        D=-1
+
+
+        (PUSH_RESULT)
+// STORE BACK ON STACK
+        @SP
+        A=M
+        M=D
+// SP++
+        @SP
+        M=M+1
+
     """,
     "lt": """
-        some ops
+
+// SP--
+        @SP
+        M=M-1   
+
+// JUMP INTO LOCATION AT SP
+        A=M 
+// SET D = RAM[A]
+        D=M 
+        
+// STORE D IN R13, DON'T USE TEMP
+        @R13
+        M=D 
+
+// SP--
+        @SP
+        M=M-1 
+
+// JUMP INTO LOCATION AT SP
+        A=M     
+// SET D = RAM[A]
+        D=M     
+
+        @R13
+        D=D-M
+
+// JUMP IF D < 0
+        @LESS-THAN
+        D;JLT
+
+
+        D=0
+        @PUSH_RESULT
+        0;JMP
+
+        (LESS-THAN)
+        D=-1
+
+
+        (PUSH_RESULT)
+// STORE BACK ON STACK
+        @SP
+        A=M
+        M=D
+// SP++
+        @SP
+        M=M+1
+
     """,
     "and": """
-        some ops
+
+// SP--
+        @SP
+        M=M-1   
+
+// JUMP INTO LOCATION AT SP
+        A=M 
+// SET D = RAM[A]
+        D=M 
+        
+// STORE D IN R13, DON'T USE TEMP
+        @R13
+        M=D 
+
+// SP--
+        @SP
+        M=M-1 
+
+// JUMP INTO LOCATION AT SP
+        A=M     
+// SET D = RAM[A]
+        D=M     
+
+        @R13
+        D=D&M
+
+// STORE BACK ON STACK
+        @SP
+        A=M
+        M=D
+// SP++
+        @SP
+        M=M+1
     """,
     "or": """
-        some ops
+
+// SP--
+        @SP
+        M=M-1   
+
+// JUMP INTO LOCATION AT SP
+        A=M 
+// SET D = RAM[A]
+        D=M 
+        
+// STORE D IN R13, DON'T USE TEMP
+        @R13
+        M=D 
+
+// SP--
+        @SP
+        M=M-1 
+
+// JUMP INTO LOCATION AT SP
+        A=M     
+// SET D = RAM[A]
+        D=M     
+
+        @R13
+        D=D|M
+
+// STORE BACK ON STACK
+        @SP
+        A=M
+        M=D
+// SP++
+        @SP
+        M=M+1
     """,
     "not": """
-        some ops
+
+// SP--
+        @SP
+        M=M-1   
+
+// JUMP INTO LOCATION AT SP
+        A=M 
+// SET D = RAM[A]
+        D=M 
+        
+// STORE D IN R13, DON'T USE TEMP
+        @R13
+        M=D 
+
+// SP--
+        @SP
+        M=M-1 
+
+// JUMP INTO LOCATION AT SP
+        A=M     
+// SET D = RAM[A]
+        D=M     
+
+        @R13
+        D=!M
+
+// STORE BACK ON STACK
+        @SP
+        A=M
+        M=D
+// SP++
+        @SP
+        M=M+1
     """
 }
 
 
-
-// TODO: 
-//  refactore the pointer segemnt (pass this and that using python)
-//  generate a rendom number with each label
 
 
 pop_instruction = {
