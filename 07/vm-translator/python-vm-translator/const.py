@@ -1,623 +1,499 @@
 
 
-// TODO: 
-//  refactore the pointer segemnt (pass this and that using python)
-//  generate a rendom number with each label
-
 
 arithmetic_ops = {
-    "add": """
-// SP--
+"add":"""
+// ADD TWO NUMBERS 
         @SP
-        M=M-1   
-
-// JUMP INTO LOCATION AT SP
-        A=M 
-// SET D = RAM[A]
+        D=M-1
+        M=D
+        A=M
         D=M 
-        
-// STORE D IN R13
         @R13
-        M=D 
-
-// SP--
+        M=D
         @SP
-        M=M-1 
-
-// JUMP INTO LOCATION AT SP
-        A=M     
-// SET D = RAM[A]
-        D=M     
-
-// ADD THE TWO NUMBERS 
+        D=M-1
+        M=D
+        A=M
+        D=M
+        @R14
+        M=D
         @R13
-        D=D+M   
-
-// STORE BACK ON STACK
+        D=M
+        @R14
+        D=D+M
         @SP
         A=M
         M=D
-
-// SP++
+        D=A+1
         @SP
-        M=M+1
-    """,
-    "sub": """
-// SP--
-        @SP
-        M=M-1   
+        M=D
+// ADD TWO NUMBERS/
+        """,
+"sub": """
+// SUB TWO NUMBERS
+              @SP
+        D=M-1
+        M=D
+        A=M
+        D=M
+        @R14
+        M=D
 
-// JUMP INTO LOCATION AT SP
-        A=M 
-// SET D = RAM[A]
-        D=M 
-        
-// STORE D IN R13, DON'T USE TEMP
+        @SP
+        D=M-1
+        M=D
+        A=M
+        D=M
         @R13
-        M=D 
+        M=D
 
-// SP--
-        @SP
-        M=M-1 
-
-// JUMP INTO LOCATION AT SP
-        A=M     
-// SET D = RAM[A]
-        D=M     
-
-// SUB THE TWO NUMBERS 
         @R13
-        D=M-D   
+        D=M
+        @R14
+        D=D-M
 
-// STORE BACK ON STACK
         @SP
         A=M
         M=D
-
-// SP++
+        D=A+1
         @SP
-        M=M+1
-    """,
-    "neg": """
-        @SP
-        M=M-1
-        A=M
-
+        M=D
+// SUB TWO NUMBERS/
+        """,
+"neg": """
 // NEG INSTRUCTION
+        @SP
+        D=M-1
+        M=D
+        A=M
         D=-M
 
-// STORE BACK ON STACK
         @SP
         A=M
         M=D
-// SP++
+        D=A+1
         @SP
-        M=M+1 
-    """,
-    "eq": """
-    
-// SP--
+        M=D
+// NEG INSTRUCTION/
+        """,
+"eq": """
+// EQ INSTRUCTION
         @SP
-        M=M-1   
-
-// JUMP INTO LOCATION AT SP
-        A=M 
-// SET D = RAM[A]
-        D=M 
-        
-// STORE D IN R13, DON'T USE TEMP
+        D=M-1
+        M=D
+        A=M
+        D=M
         @R13
-        M=D 
+        M=D
 
-// SP--
         @SP
-        M=M-1 
-
-// JUMP INTO LOCATION AT SP
-        A=M     
-// SET D = RAM[A]
-        D=M     
+        D=M-1
+        M=D
+        A=M
+        D=M
+        @R14
+        M=D
 
         @R13
+        D=M
+        @R14
         D=D-M
-
-// JUMP TO NOT_EQUAL IF D != 0
-        @NOT_EQUAL
+        @{random}.NOT_EQUAL
         D;JNE
 
-
-// JUMP IF EQUAL
         D=-1
-        @PUSH_RESULT
-        0;JMP
+        @{random}.PUSH_RESULT
+        1;JMP
 
-
-        ({}-NOT_EQUAL)
+        ({random}.NOT_EQUAL)
         D=0
 
-
-        (PUSH_RESULT)
-// STORE BACK ON STACK
+        ({random}.PUSH_RESULT)
         @SP
         A=M
         M=D
-// SP++
+        D=A+1
         @SP
-        M=M+1
-    """,
-    "gt": """
-    
-// SP--
+        M=D
+// EQ INSTRUCTION/
+        """,
+"gt": """
+// GT INSTRUCTION
         @SP
-        M=M-1   
+        D=M-1
+        M=D
+        A=M
+        D=M
+        @R14
+        M=D
 
-// JUMP INTO LOCATION AT SP
-        A=M 
-// SET D = RAM[A]
-        D=M 
-        
-// STORE D IN R13, DON'T USE TEMP
+        @SP
+        D=M-1
+        M=D
+        A=M
+        D=M
         @R13
-        M=D 
-
-// SP--
-        @SP
-        M=M-1 
-
-// JUMP INTO LOCATION AT SP
-        A=M     
-// SET D = RAM[A]
-        D=M     
+        M=D
 
         @R13
+        D=M
+        @R14
         D=D-M
-
-// JUMP IF D > 0
-        @GREATER-THAN
+        @{random}.GREATER_THAN
         D;JGT
 
-
         D=0
-        @PUSH_RESULT
-        0;JMP
+        @{random}.PUSH_RESULT
+        1;JMP
 
-        (GREATER-THAN)
+        ({random}.GREATER_THAN)
         D=-1
 
-
-        (PUSH_RESULT)
-// STORE BACK ON STACK
+        ({random}.PUSH_RESULT)
         @SP
         A=M
         M=D
-// SP++
+        D=A+1
         @SP
-        M=M+1
-
-    """,
-    "lt": """
-
-// SP--
+        M=D
+// GT INSTRUCTION/
+        """,
+"lt": """
+// LT INSTRUCTION
         @SP
-        M=M-1   
+        D=M-1
+        M=D
+        A=M
+        D=M
+        @R14
+        M=D
 
-// JUMP INTO LOCATION AT SP
-        A=M 
-// SET D = RAM[A]
-        D=M 
-        
-// STORE D IN R13, DON'T USE TEMP
+        @SP
+        D=M-1
+        M=D
+        A=M
+        D=M
         @R13
-        M=D 
-
-// SP--
-        @SP
-        M=M-1 
-
-// JUMP INTO LOCATION AT SP
-        A=M     
-// SET D = RAM[A]
-        D=M     
+        M=D
 
         @R13
+        D=M
+        @R14
         D=D-M
-
-// JUMP IF D < 0
-        @LESS-THAN
+        @{random}.LESS_THAN
         D;JLT
 
-
         D=0
-        @PUSH_RESULT
-        0;JMP
+        @{random}.PUSH_RESULT
+        1;JMP
 
-        (LESS-THAN)
+        ({random}.LESS_THAN)
         D=-1
 
-
-        (PUSH_RESULT)
-// STORE BACK ON STACK
+        ({random}.PUSH_RESULT)
         @SP
         A=M
         M=D
-// SP++
+        D=A+1
         @SP
-        M=M+1
-
-    """,
-    "and": """
-
-// SP--
+        M=D
+// LT INSTRUCTION/
+        """,
+"and": """
+// AND INSTRUCTION
         @SP
-        M=M-1   
-
-// JUMP INTO LOCATION AT SP
-        A=M 
-// SET D = RAM[A]
-        D=M 
-        
-// STORE D IN R13, DON'T USE TEMP
+        D=M-1
+        M=D
+        A=M
+        D=M
         @R13
-        M=D 
+        M=D
 
-// SP--
         @SP
-        M=M-1 
-
-// JUMP INTO LOCATION AT SP
-        A=M     
-// SET D = RAM[A]
-        D=M     
+        D=M-1
+        M=D
+        A=M
+        D=M
+        @R14
+        M=D
 
         @R13
+        D=M
+        @R14
         D=D&M
 
-// STORE BACK ON STACK
         @SP
         A=M
         M=D
-// SP++
+        D=A+1
         @SP
-        M=M+1
-    """,
-    "or": """
-
-// SP--
+        M=D
+// AND INSTRUCTION/
+        """,
+"or": """
+// OR INSTRUCTION
         @SP
-        M=M-1   
-
-// JUMP INTO LOCATION AT SP
-        A=M 
-// SET D = RAM[A]
-        D=M 
-        
-// STORE D IN R13, DON'T USE TEMP
+        D=M-1
+        M=D
+        A=M
+        D=M
         @R13
-        M=D 
+        M=D
 
-// SP--
         @SP
-        M=M-1 
-
-// JUMP INTO LOCATION AT SP
-        A=M     
-// SET D = RAM[A]
-        D=M     
+        D=M-1
+        M=D
+        A=M
+        D=M
+        @R14
+        M=D
 
         @R13
+        D=M
+        @R14
         D=D|M
 
-// STORE BACK ON STACK
         @SP
         A=M
         M=D
-// SP++
+        D=A+1
         @SP
-        M=M+1
-    """,
-    "not": """
-
-// SP--
+        M=D
+// OR INSTRUCTION/
+        """,
+"not": """
+// NOT INSTRUCTION
         @SP
-        M=M-1   
-
-// JUMP INTO LOCATION AT SP
-        A=M 
-// SET D = RAM[A]
-        D=M 
-        
-// STORE D IN R13, DON'T USE TEMP
-        @R13
-        M=D 
-
-// SP--
-        @SP
-        M=M-1 
-
-// JUMP INTO LOCATION AT SP
-        A=M     
-// SET D = RAM[A]
-        D=M     
-
-        @R13
+        D=M-1
+        M=D
+        A=M
         D=!M
 
-// STORE BACK ON STACK
         @SP
         A=M
         M=D
-// SP++
+        D=A+1
         @SP
-        M=M+1
-    """
+        M=D
+// NOT INSTRUCTION/
+        """
 }
 
 
 
-
 pop_instruction = {
-    "local": """
-// D = LCL+i
-        @{}
+"local": """
+// POP LOCAL
+        @{position}
         D=A
         @LCL
         D=D+M   
-        
-// SET RAM[R12] = D
         @R12
         M=D     
 
-// SP--
         @SP
         M=M-1
-// JUMP INTO LOCATION AT SP
         A=M
-// D = RAM[A]
         D=M
-        
-// JUMP TO LOCATION AT LCL+i
+
         @R12
         A=M
-// LCL[i] = D
         M=D
-    """,
-    "argument": """
-// D = ARG+i
-        @{}
+// POP LOCAL/
+        """,
+"argument": """
+// POP ARGUMENT
+        @{position}
         D=A
         @ARG
         D=D+M   
-        
-// SET RAM[R12] = D
+
         @R12
         M=D     
-
-// SP--
         @SP
         M=M-1
-// JUMP INTO LOCATION AT SP
         A=M
-// D = RAM[A]
         D=M
-        
-// JUMP TO LOCATION AT ARG+i
+
         @R12
         A=M
-// ARG[i] = D
         M=D
-    """,
-    "temp": """
-// SP--
+// POP ARGUMENT/
+        """,
+"temp": """
+// POP TEMP
         @SP
         M=M-1
-// JUMP INTO LOCATION AT SP
         A=M
-// D = RAM[A]
         D=M
-
-// TEMP+i = D
-        @{}
+        @{position + 5}
         M=D
-    """,
-    "static": """
-// SP--
+// POP TEMP/
+        """,
+        "static": """
+// POP STATIC
         @SP
         M=M-1
-// JUMP INTO LOCATION AT SP
         A=M
-// D = RAM[A]
         D=M
-
-// STATIC+i = D
-        @{}
+        @{position + 16}
         M=D
-    """,
-    "pointer": """
+// POP STATIC/
+        """,
+"pointer": """
+// POP POINTER
 
-// i = 0(THIS) OR i = 1(THAT)
-        @{}
+        @{position}
         D=A
-// IF i = 0; (i - 1) != 0 ELSE (i - 1) == 0
         D=D-1
-        @THIS.SEGMENT
-// IF i == 0 JUMP TO THIS.SEGMENT
+        @{random}-THIS-SEGMENT
         D;JNE
 
-// IF ABOVE CODE DOSEN'T JUMP THAN JUMP TO THAT.SEGMENT
-        @THAT.SEGMENT
+        @{random}-THAT-SEGMENT
         0;JMP
 
-
-        (THIS.SEGMENT)
-// SP--
+        ({random}-THIS-SEGMENT)
         @SP
         M=M-1
         A=M
         D=M
-        
         @THIS
         M=D
 
 
-        (THAT.SEGMENT)
-// SP--
+        ({random}-THAT-SEGMENT)
         @SP
         M=M-1
         A=M
         D=M
-        
         @THAT
         M=D
-    """,
-    "that": """
-        @{}
+// POP POINTER/
+        """,
+"that": """
+// POP THAT
+        @{position}
         D=A
-
         @THAT
         D=D+M
-
         @R13
         M=D
 
-// SP--
         @SP
         M=M-1
-
         A=M
         D=M
-
-// STORE VALUE ON STACK IN  i+THAT (RAM[i+THAT]=*SP)
         @R13
         A=M
         M=D
-
-    """,
-    "this": """
-        @{}
+// POP THAT/
+        """,
+"this": """
+// POP THIS
+        @{position}
         D=A
-
         @THIS
         D=D+M
 
         @R13
         M=D
-
-// SP--
         @SP
         M=M-1
-
         A=M
         D=M
 
-// STORE VALUE ON STACK IN  i+THIS (RAM[i+THIS]=*SP)
         @R13
         A=M
         M=D
-    """
-
+// POP THIS/
+        """
 }
 
 
 
 
 push_instruction = {
-    "local": """
-// D=i
-        @{}
+"local": """
+// PUSH LOCAL
+        @{position}
         D=A     
-
-// A=LCL+i JUMP TO THAT MEMORY AND STORE VALUE IN D
         @LCL
         A=D+M
         D=M
 
-// JUMP TO LOCATION OF SP
         @SP
         A=M
-
-// SET RAM[*SP] = D
         M=D
-
-// SP++
         @SP
         M=M+1
-
-    """,
-    "constant": """
-// D=i
-        @{}
+// PUSH LOCAL/
+        """,
+"constant": """
+// PUSH CONSTANT
+        @{position}
         D=A
-
-// JUMP TO LOCATION OF SP AND STORE i THERE
         @SP
         A=M
         M=D
 
-// SP++
         @SP
         M=M+1
-    """,
-    "temp": """
-// D = TEMP+i
-        @{}
+// PUSH CONSTANT/
+        """,
+"temp": """
+// PUSH TEMP
+        @{position + 5}
         D=M
-
-// JUMP INTO LOCATION AT SP
         @SP
         A=M
         M=D
-// SP++
         @SP
         M=M+1
-    """,
-    "static": """
-// D = STATIC+i
-        @{}
+// PUSH TEMP/
+        """,
+"static": """
+// PUSH STATIC
+        @{position + 16}
         D=M
-
-// JUMP INTO LOCATION AT SP
         @SP
         A=M
         M=D
-// SP++
         @SP
         M=M+1
-    """,
-    "pointer": """
-// i = 0(THIS) OR i = 1(THAT)
-        @{}
+// PUSH STATIC/
+        """,
+"pointer": """
+// PUSH POINTER
+        @{position}
         D=A
-// IF i = 0; (i - 1) != 0 ELSE (i - 1) == 0
         D=D-1
-        @THIS.SEGMENT
-// IF i == 0 JUMP TO THIS.SEGMENT
+        @{random}-THIS-SEGMENT
         D;JNE
 
-        (THAT.SEGMENT)
+        ({random}-THAT-SEGMENT)
         @THAT
         D=M
-        @POINTER.PUSH_RESULT
+        @{random}-POINTER.PUSH_RESULT
         0;JMP
 
-
-        (THIS.SEGMENT)
+        ({random}-THIS-SEGMENT)
         @THIS
         D=M
 
 
-        (POINTER.PUSH_RESULT)
-// STORE BACK ON STACK
+        ({random}-POINTER.PUSH_RESULT)
         @SP
         A=M
         M=D
-// SP++
         @SP
         M=M+1 
-    """,
-    "that": """
-        @{}
+// PUSH POINTER/
+        """,
+"that": """
+// PUSH THAT
+        @{position}
         D=A
-
         @THAT
         A=D+M
         D=M
@@ -626,26 +502,23 @@ push_instruction = {
         @SP
         A=M
         M=D
-        
-// SP++
         @SP
         M=M+1
-    """,
-    "this": """
-        @{}
+// PUSH THAT/
+        """,
+"this": """
+// PUSH THIS
+        @{position}
         D=A
-
         @THIS
         A=D+M
         D=M
 
-
         @SP
         A=M
         M=D
-        
-// SP++
         @SP
         M=M+1
-    """
+// PUSH THIS/
+        """
 }

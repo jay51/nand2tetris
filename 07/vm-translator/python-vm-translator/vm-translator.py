@@ -111,6 +111,7 @@ M=M+1 # SP++
 
 
 import sys
+import uuid
 from const import push_instruction , pop_instruction , arithmetic_ops
 
 
@@ -141,7 +142,8 @@ class Parser:
                 f.write(func(line))
         
         print("Wrote: %d lines to %s" %(len(self.lines), file_name))
-    
+
+
 
 
 
@@ -149,26 +151,27 @@ def vm_translator(line):
     
     print(line)
     translated_line = ""
+    random = str(uuid.uuid1())
 
     try:
         if line[0].upper() == "PUSH":
-            if line[1] == "temp":
-                # TEMP START AT RAM[5]
-                translated_line = push_instruction[line[1]].format(line[2] + 5)
-            elif line[1] == "static":
-                # STATIC START AT RAM[5]
-                translated_line = push_instruction[line[1]].format(line[2] + 16)
+            segment = line[1]
+            position = line[2] + 5 if line[1] == "temp" else line[2]
+            position = line[2] + 16 if line[1] == "static" else line[2]
+
+            translated_line = push_instruction[segment].replace("{random}", random)
+            translated_line = push_instruction[segment].replace("{position}", position)
 
         elif line[0].upper() == "POP":
-            if line[1] == "temp":
-                # TEMP START AT RAM[5]
-                translated_line = push_instruction[line[1]].format(line[2] + 5)
-            elif line[1] == "static":
-                # STATIC START AT RAM[5]
-                translated_line = push_instruction[line[1]].format(line[2] + 16)
+            segment = line[1]
+            position = line[2] + 5 if line[1] == "temp" else line[2]
+            position = line[2] + 16 if line[1] == "static" else line[2]
+
+            translated_line = pop_instruction[segment].replace("{random}", random)
+            translated_line = pop_instruction[segment].replace("{position}", position)
             
         else:
-            translated_line = arithmetic_ops[line[0]]
+            translated_line = arithmetic_ops[line[0]].replace("{random}", random)
 
     except Exception as e:
         print(e)
@@ -189,6 +192,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
 
