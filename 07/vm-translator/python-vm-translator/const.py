@@ -327,7 +327,7 @@ pop_instruction = {
         M=M-1
         A=M
         D=M
-        @{position + 5}
+        @{position}
         M=D
 // POP TEMP/
         """,
@@ -337,7 +337,7 @@ pop_instruction = {
         M=M-1
         A=M
         D=M
-        @{position + 16}
+        @{position}
         M=D
 // POP STATIC/
         """,
@@ -429,6 +429,32 @@ push_instruction = {
         M=M+1
 // PUSH LOCAL/
         """,
+"argument": """
+// PUSH ARGUMENT
+        @{position}
+        D=A
+        @ARG
+        A=D+M   
+        D=M
+
+        @SP
+        A=M
+        M=D
+
+        @SP
+        M=M+1
+// PUSH ARGUMENT/
+        """,
+"temp": """
+// POP TEMP
+        @SP
+        M=M-1
+        A=M
+        D=M
+        @{position}
+        M=D
+// POP TEMP/
+        """,
 "constant": """
 // PUSH CONSTANT
         @{position}
@@ -443,7 +469,7 @@ push_instruction = {
         """,
 "temp": """
 // PUSH TEMP
-        @{position + 5}
+        @{position}
         D=M
         @SP
         A=M
@@ -454,7 +480,7 @@ push_instruction = {
         """,
 "static": """
 // PUSH STATIC
-        @{position + 16}
+        @{position}
         D=M
         @SP
         A=M

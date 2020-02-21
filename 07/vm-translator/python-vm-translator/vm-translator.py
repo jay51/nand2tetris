@@ -112,6 +112,7 @@ M=M+1 # SP++
 
 import sys
 import uuid
+import traceback
 from const import push_instruction , pop_instruction , arithmetic_ops
 
 
@@ -141,7 +142,7 @@ class Parser:
             for line in self.lines:
                 f.write(func(line))
         
-        print("Wrote: %d lines to %s" %(len(self.lines), file_name))
+        print("Wrote: %d VM instructions to %s" %(len(self.lines), file_name))
 
 
 
@@ -156,26 +157,27 @@ def vm_translator(line):
     try:
         if line[0].upper() == "PUSH":
             segment = line[1]
-            position = line[2] + 5 if line[1] == "temp" else line[2]
-            position = line[2] + 16 if line[1] == "static" else line[2]
+            position = int(line[2]) + 5 if segment == "temp" else line[2]
+            position = int(line[2]) + 16 if segment == "static" else position
 
             translated_line = push_instruction[segment].replace("{random}", random)
-            translated_line = push_instruction[segment].replace("{position}", position)
+            translated_line = push_instruction[segment].replace("{position}", str(position))
 
         elif line[0].upper() == "POP":
             segment = line[1]
-            position = line[2] + 5 if line[1] == "temp" else line[2]
-            position = line[2] + 16 if line[1] == "static" else line[2]
+            position = int(line[2]) + 5 if segment == "temp" else line[2]
+            position = int(line[2]) + 16 if segment == "static" else position
 
             translated_line = pop_instruction[segment].replace("{random}", random)
-            translated_line = pop_instruction[segment].replace("{position}", position)
+            translated_line = pop_instruction[segment].replace("{position}", str(position))
             
         else:
             translated_line = arithmetic_ops[line[0]].replace("{random}", random)
 
     except Exception as e:
-        print(e)
-        sys.stderr.write("Error: Wrong instruction %s" %line[0])
+        # print(e)
+        traceback.print_exc()
+        sys.stderr.write("Error: Wrong instruction %s\n" %line[0])
         sys.exit()
 
     return translated_line
@@ -184,7 +186,7 @@ def vm_translator(line):
 
 def main():
     if len(sys.argv) < 2:
-        sys.stderr.write("Usage: vm-translator <file_name.vm>")
+        sys.stderr.write("Usage: vm-translator <file_name.vm>\n")
         sys.exit(2)
 
     Parser(sys.argv[1]).assemble_file(vm_translator)
