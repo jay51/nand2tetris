@@ -5,9 +5,6 @@ import sys
 from const import COMP, PREDEFINED_MEM, JUMP, DEST
 
 
-# TODO:
-#   assembler generate no output when you add comments at the end of an instruction
-
 
 class Parser():
     # iter of all free memory starting from 16 to address of SCREEN
@@ -58,7 +55,7 @@ class Parser():
 
 
     def write_to_file(self, opcode):
-        with open(self.filename + ".hack", "w") as f:
+        with open(self.filename.replace("asm", "hack"), "w") as f:
             for binary_op in opcode:
                 f.write(binary_op.__str__() + "\n")
 
