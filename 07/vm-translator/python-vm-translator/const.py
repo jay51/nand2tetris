@@ -343,31 +343,12 @@ pop_instruction = {
         """,
 "pointer": """
 // POP POINTER
-
-        @{position}
-        D=A
-        D=D-1
-        @{random}-THIS-SEGMENT
-        D;JNE
-
-        @{random}-THAT-SEGMENT
-        0;JMP
-
-        ({random}-THIS-SEGMENT)
         @SP
         M=M-1
         A=M
         D=M
-        @THIS
-        M=D
 
-
-        ({random}-THAT-SEGMENT)
-        @SP
-        M=M-1
-        A=M
-        D=M
-        @THAT
+        @{THIS_THAT}
         M=D
 // POP POINTER/
         """,
@@ -491,24 +472,9 @@ push_instruction = {
         """,
 "pointer": """
 // PUSH POINTER
-        @{position}
-        D=A
-        D=D-1
-        @{random}-THIS-SEGMENT
-        D;JNE
-
-        ({random}-THAT-SEGMENT)
-        @THAT
-        D=M
-        @{random}-POINTER.PUSH_RESULT
-        0;JMP
-
-        ({random}-THIS-SEGMENT)
-        @THIS
+        @{THIS_THAT}
         D=M
 
-
-        ({random}-POINTER.PUSH_RESULT)
         @SP
         A=M
         M=D

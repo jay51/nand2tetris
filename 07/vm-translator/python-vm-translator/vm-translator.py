@@ -162,6 +162,8 @@ def vm_translator(line):
 
             translated_line = push_instruction[segment].replace("{random}", random)
             translated_line = translated_line.replace("{position}", str(position))
+            this_that = "THIS" if line[2] == "0" else "THAT" 
+            translated_line = translated_line.replace("{THIS_THAT}", this_that)
 
         elif line[0].upper() == "POP":
             segment = line[1]
@@ -170,6 +172,8 @@ def vm_translator(line):
 
             translated_line = pop_instruction[segment].replace("{random}", random)
             translated_line = translated_line.replace("{position}", str(position))
+            this_that = "THIS" if line[2] == "0" else "THAT" 
+            translated_line = translated_line.replace("{THIS_THAT}", this_that)
             
         else:
             translated_line = arithmetic_ops[line[0]].replace("{random}", random)
