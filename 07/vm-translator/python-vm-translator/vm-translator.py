@@ -113,31 +113,41 @@ M=M+1 # SP++
 import sys
 import uuid
 import traceback
+import os
 from const import push_instruction , pop_instruction , arithmetic_ops
 
 
 class Parser:
 
-    def __init__(self, file_name):
-        self.file_name = file_name
+    # path is type list<args>
+    def __init__(self, path):
 
-        with open(file_name, "r") as f:
-            self.lines = self.parse(f)
-                
+        if(len(path) == 1 and path[0].endswith(".vm")):
+            self.files = path
+            self.file_name =  path[0].split(".")[0] + ".asm"
+        else:
+            self.files = [path[0] + f for f in os.walk(path[0]).__next__()[2] if f.endswith(".vm")]
+            self.file_name =  path[0] + path[0].replace("/", ".asm")
 
 
-    def parse(self, f):
+        self.lines = self.parse(self.files)
+            
+
+
+    def parse(self, files):
         lines = []
-        for line in f:
-            if line.strip() and not line.strip().startswith("//") : # is not a comment or empty line
-                idx = line.find("//")
-                lines.append(line[:idx].split())
+        for vm_file in files:
+            with open(vm_file, "r") as f:
+                for line in f:
+                    if line.strip() and not line.strip().startswith("//") : # is not a comment or empty line
+                        idx = line.find("//")
+                        lines.append(line[:idx].split())
 
         return lines
             
 
     def assemble_file(self, func, f_name=None):
-        file_name = f_name if f_name else self.file_name.split(".")[0] + ".asm"
+        file_name = f_name if f_name else self.file_name
         with open(file_name, "w") as f:
             for line in self.lines:
                 f.write(func(line))
@@ -189,11 +199,11 @@ def vm_translator(line):
 
 
 def main():
-    if len(sys.argv) < 2:
-        sys.stderr.write("Usage: vm-translator <file_name.vm>\n")
+    if not(len(sys.argv) == 2):
+        sys.stderr.write("Usage: vm-translator <file_name.vm>\n\tvm-translator <dir_name>/\n")
         sys.exit(2)
 
-    Parser(sys.argv[1]).assemble_file(vm_translator)
+    Parser(sys.argv[1:]).assemble_file(vm_translator)
 
 
 if __name__ == "__main__":
