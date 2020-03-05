@@ -513,9 +513,6 @@ push_instruction = {
 }
 
 
-
-
-
 branching_instruction = {
 "label": """
 // DEFINE LABEL
@@ -538,4 +535,148 @@ branching_instruction = {
         D;JNE
 // IF-GOTO LABEL/
 """
+}
+
+
+function_instruction = {
+"return": """
+// CALL RETURN
+    // SAVE LCL TO R13
+        @LCL
+        D=M
+        @R13
+        M=D
+
+    // SAVE RETURN ADDRESS TO R14
+        @5
+        A=D-A
+        D=M
+        @R14
+        M=D
+
+    // set arg to hold return value
+        @SP
+        M=M-1
+        A=M
+        D=M
+        @ARG
+        A=M
+        M=D
+
+    // RESET STACK POINTER
+        @ARG
+        D=M+1
+        @SP
+        M=D
+
+    // RESET THAT
+        @R13
+        A=M-1
+        D=M
+        @THAT
+        M=D
+
+    // RESET THIS
+        @R13
+        D=M
+        @2
+        A=D-A
+        D=M
+        @THIS
+        M=D
+
+    // RESET ARG
+        @R13
+        D=M
+        @3
+        A=D-A
+        D=M
+        @ARG
+        M=D
+
+    // RESET LCL
+        @R13
+        D=M
+        @4
+        A=D-A
+        D=M
+        @LCL
+        M=D
+
+    // RETURN
+        @R14
+        A=M
+        0;JMP
+// CALL RETURN/
+        """,
+"call": """
+// CALL FUNCTION
+        @{return-address}
+        D=A
+        @SP
+        A=M
+        M=D
+        @SP
+        M=M+1
+
+    // PUSH LCL, ARG, THIS, THAT
+        @LCL
+        D=M
+        @SP
+        A=M
+        M=D
+        @SP
+        M=M+1
+
+        @ARG
+        D=M
+        @SP
+        A=M
+        M=D
+        @SP
+        M=M+1
+
+        @THIS
+        D=M
+        @SP
+        A=M
+        M=D
+        @SP
+        M=M+1
+
+        @THAT
+        D=M
+        @SP
+        A=M
+        M=D
+        @SP
+        M=M+1
+
+    // LCL = SP
+        @SP
+        D=M
+        @LCL
+        M=D
+
+    // ARG = SP-n-5
+        @SP
+        D=M
+        @{num-args}
+        D=D-A
+        @ARG
+        M=D
+
+    // GO TO FUNCTION
+        @{function-name}
+        0;JMP
+
+    ({return_address})
+// CALL FUNCTION/
+        """,
+"function": """
+// DEFINE FUNCTION
+        ({function-name})
+        {N-LCL}
+// DEFINE FUNCTION/
+        """
 }

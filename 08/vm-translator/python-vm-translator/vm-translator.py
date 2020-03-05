@@ -16,7 +16,9 @@ import sys
 import uuid
 import traceback
 import os
-from const import push_instruction , pop_instruction , arithmetic_ops, branching_instruction
+from const import push_instruction, pop_instruction, \
+                arithmetic_ops, branching_instruction,\
+                function_instruction
 
 
 class Parser:
@@ -41,8 +43,9 @@ class Parser:
         for vm_file in files:
             with open(vm_file, "r") as f:
                 for line in f:
-                    if line.strip() and not line.strip().startswith("//") : # is not a comment or empty line
-                        idx = line.find("//")
+                    striped_line = line.strip()
+                    if striped_line and not striped_line.startswith("//") : # is not a comment or empty line
+                        idx = line.find("//") # ignore // if instruction ends with //
                         lines.append(line[:idx].split())
 
         return lines
@@ -58,9 +61,7 @@ class Parser:
 
 
 
-
-
-def vm_translator(line):
+def vm_translator(line): 
     
     print(line)
     translated_line = ""
@@ -98,6 +99,42 @@ def vm_translator(line):
         elif line[0].upper() == "IF-GOTO":
             label_name = line[1]
             translated_line = branching_instruction["if-goto"].replace("{label-name}", label_name)
+
+        elif line[0].upper() == "FUNCTION":
+            function_name = line[1]
+            num_locals = int(line[2])
+            if(num_locals):
+                push_zeros_to_stack = """
+                @SP
+                A=M
+                M=0
+                @SP
+                M=M+1
+                """
+            else:
+                push_zeros_to_stack = ""
+
+            for _ in range(1, num_locals):
+                push_zeros_to_stack+= push_zeros_to_stack
+
+            translated_line = function_instruction["function"].replace("{function-name}", function_name)
+            translated_line = translated_line.replace("{N-LCL}", push_zeros_to_stack)
+
+        elif line[0].upper() == "CALL":
+            function_name = line[0]
+            num_of_calls=0
+            return_address = line[0] + "-RET-" + str(num_of_calls)
+            num_of_calls += 1
+            num_args = line[2]
+
+            translated_line = function_instruction["call"].replace("{return-address}", return_address)
+            translated_line = translated_line.replace("{function-name}", function_name)
+            translated_line = translated_line.replace("{num-args}", num_args)
+
+
+        elif line[0].upper() == "RETURN":
+            translated_line = function_instruction["return"]
+
 
         else:
             translated_line = arithmetic_ops[line[0]].replace("{random}", random)
