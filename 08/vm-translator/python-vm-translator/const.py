@@ -670,7 +670,7 @@ function_instruction = {
         @{function-name}
         0;JMP
 
-    ({return_address})
+    ({return-address})
 // CALL FUNCTION/
         """,
 "function": """

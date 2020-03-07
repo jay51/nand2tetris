@@ -94,7 +94,7 @@ class Translator():
 
 
     def define_label(self, line):
-        label_name = line[1] if not self.inside_function else line[1] + "$" + self.curr_function
+        label_name = line[1] if not self.inside_function else self.curr_function + "$" + line[1] 
         translated_line = branching_instruction["label"].replace("{label-name}", label_name)
         return translated_line
 
@@ -126,8 +126,8 @@ class Translator():
 
 
     def call_function(self, line):
-        function_name = line[0]
-        return_address = line[0] + "-RET-" + str(self.num_of_function_calls)
+        function_name = line[1]
+        return_address = line[1] + "-RET-" + str(self.num_of_function_calls)
         self.num_of_function_calls += 1
         num_args = line[2]
 
