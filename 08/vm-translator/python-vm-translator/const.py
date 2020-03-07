@@ -663,6 +663,8 @@ function_instruction = {
         D=M
         @{num-args}
         D=D-A
+        @5
+        D=D-A
         @ARG
         M=D
 
@@ -680,3 +682,12 @@ function_instruction = {
 // DEFINE FUNCTION/
         """
 }
+
+
+init_code = """
+        @256
+        D=A
+        @SP
+        M=D
+"""
+

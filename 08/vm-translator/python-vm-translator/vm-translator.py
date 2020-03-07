@@ -18,7 +18,7 @@ import traceback
 import os
 from const import push_instruction, pop_instruction, \
                 arithmetic_ops, branching_instruction,\
-                function_instruction
+                function_instruction, init_code
 
 
 class Parser:
@@ -100,13 +100,13 @@ class Translator():
 
 
     def define_goto(self, line):
-        label_name = line[1] if not self.inside_function else line[1] + "$" + self.curr_function
+        label_name = line[1] if not self.inside_function else  self.curr_function + "$" + line[1]
         translated_line = branching_instruction["goto"].replace("{label-name}", label_name)
         return translated_line
 
 
     def define_if_goto(self, line):
-        label_name = line[1] if not self.inside_function else line[1] + "$" + self.curr_function
+        label_name = line[1] if not self.inside_function else  self.curr_function + "$" + line[1]
         translated_line = branching_instruction["if-goto"].replace("{label-name}", label_name)
         return translated_line
 
@@ -117,7 +117,7 @@ class Translator():
 
             init_locals = ""
             if(num_locals):
-                for _ in range(1, num_locals):
+                for _ in range(num_locals):
                     init_locals += self.push_instruction(["push", "constant", "0"], "0")
 
             translated_line = function_instruction["function"].replace("{function-name}", function_name)
@@ -141,8 +141,17 @@ class Translator():
         return function_instruction["return"]
 
 
+    def init_bootstrap(self):
+        return init_code
+
+
     def translate(self):
         with open(self.file_name, "w") as f:
+            # bootstrap code (initinitalize sp and call Sys.init) 
+            # comment out the 2 lines below when run test for programFlow
+            # f.write(self.init_bootstrap())
+            # f.write(self.call_function(["call", "Sys.init", "0"]))
+
             for line in self.lines:
                 translation = self.translate_line(line)
                 f.write(translation)
@@ -171,14 +180,11 @@ class Translator():
                 return self.define_if_goto(line)
 
             if line[0].upper() == "FUNCTION":
-                # not necessary b/c before executing a function we need to call it
-                # self.curr_function = line[1]
-                # self.inside_function = True
+                self.curr_function = line[1]
+                self.inside_function = True
                 return self.define_function(line)
 
             if line[0].upper() == "CALL":
-                self.curr_function = line[1]
-                self.inside_function = True
                 return self.call_function(line)
 
             if line[0].upper() == "RETURN":
