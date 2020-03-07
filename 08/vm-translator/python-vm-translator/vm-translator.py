@@ -26,9 +26,9 @@ class Parser:
     # path is type list<args>
     def __init__(self, path):
 
-        if(len(path) == 1 and path[0].endswith(".vm")):
+        if(path[0].endswith(".vm")):
             self.files = path
-            self.file_name =  path[0].split(".")[0] + ".asm"
+            self.file_name = path[0].split(".")[0] + ".asm"
         else:
             self.files = [path[0] + f for f in os.walk(path[0]).__next__()[2] if f.endswith(".vm")]
             self.file_name =  path[0] + path[0].replace("/", ".asm")
@@ -149,8 +149,8 @@ class Translator():
         with open(self.file_name, "w") as f:
             # bootstrap code (initinitalize sp and call Sys.init) 
             # comment out the 2 lines below when run test for programFlow
-            # f.write(self.init_bootstrap())
-            # f.write(self.call_function(["call", "Sys.init", "0"]))
+            f.write(self.init_bootstrap())
+            f.write(self.call_function(["call", "Sys.init", "0"]))
 
             for line in self.lines:
                 translation = self.translate_line(line)

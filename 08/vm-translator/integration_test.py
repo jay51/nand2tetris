@@ -3,10 +3,10 @@
 import os
 import subprocess
 
-# todo:
+# HOW:
 #   find all dirs and files to test
 #   run assembler on *.vm file in test folder and place the result file in same dir
-#   run CPUEmulator on gnerated *.asm file in test dir
+#   run CPUEmulator passing <testfile>.tst
 
 
 if __name__ == "__main__":
@@ -19,7 +19,12 @@ if __name__ == "__main__":
 
     for root, dirs, files in os.walk(pathto_07):
         if("vm-translator" not in root and files):
-            vm_file = root + "/" + [f for f in files if f.endswith("vm")][0]
+
+            # pass entire dir or just one file
+            vm_file = root + "/"
+            if("ProgramFlow" in root or "SimpleFunction" in root):
+                vm_file = root + "/" + [f for f in files if f.endswith("vm")][0]
+
             tst_file = root + "/" + [f for f in files if "VM" not in f and f.endswith("tst")][0]
 
             try:
