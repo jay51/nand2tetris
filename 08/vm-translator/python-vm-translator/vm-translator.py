@@ -31,7 +31,7 @@ class Parser:
             self.file_name = path[0].split(".")[0] + ".asm"
         else:
             self.files = [path[0] + f for f in os.walk(path[0]).__next__()[2] if f.endswith(".vm")]
-            self.file_name =  path[0] + path[0].replace("/", ".asm")
+            self.file_name = path[0] + path[0].split("/")[-2] + ".asm"
 
         self.lines = self.parse(self.files)
             
