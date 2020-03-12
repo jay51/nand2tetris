@@ -16,7 +16,6 @@ import sys
 import uuid
 import traceback
 import os
-import ntpath
 from const import push_instruction, pop_instruction, \
                 arithmetic_ops, branching_instruction,\
                 function_instruction, init_code
@@ -38,7 +37,7 @@ class Parser:
         self.parsed_files = dict() # {<file_name>: [<linse>]}
         for f in self.files:
             lines = self.parse(f)
-            _, file_name = ntpath.split(f) # get only file_name instead of path
+            file_name = os.path.basename(f)
             self.parsed_files[file_name] = lines
             
 
