@@ -334,7 +334,7 @@ pop_instruction = {
         M=M-1
         A=M
         D=M
-        @{position}
+        @{static-var}
         M=D
 // POP STATIC/
         """,
@@ -458,7 +458,7 @@ push_instruction = {
         """,
 "static": """
 // PUSH STATIC
-        @{position}
+        @{static-var}
         D=M
         @SP
         A=M

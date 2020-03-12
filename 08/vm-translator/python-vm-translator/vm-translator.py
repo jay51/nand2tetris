@@ -16,6 +16,7 @@ import sys
 import uuid
 import traceback
 import os
+import ntpath
 from const import push_instruction, pop_instruction, \
                 arithmetic_ops, branching_instruction,\
                 function_instruction, init_code
@@ -33,19 +34,23 @@ class Parser:
             self.files = [path[0] + f for f in os.walk(path[0]).__next__()[2] if f.endswith(".vm")]
             self.file_name = path[0] + path[0].split("/")[-2] + ".asm"
 
-        self.lines = self.parse(self.files)
+
+        self.parsed_files = dict() # {<file_name>: [<linse>]}
+        for f in self.files:
+            lines = self.parse(f)
+            _, file_name = ntpath.split(f) # get only file_name instead of path
+            self.parsed_files[file_name] = lines
             
 
 
-    def parse(self, files):
+    def parse(self, vm_file):
         lines = []
-        for vm_file in files:
-            with open(vm_file, "r") as f:
-                for line in f:
-                    striped_line = line.strip()
-                    if striped_line and not striped_line.startswith("//") : # is not a comment or empty line
-                        idx = line.find("//") # ignore // if instruction ends with //
-                        lines.append(line[:idx].split())
+        with open(vm_file, "r") as f:
+            for line in f:
+                striped_line = line.strip()
+                if striped_line and not striped_line.startswith("//") : # is not a comment or empty line
+                    idx = line.find("//") # ignore // if instruction ends with //
+                    lines.append(line[:idx].split())
 
         return lines
             
@@ -53,8 +58,8 @@ class Parser:
     def get_new_filename(self):
         return self.file_name
 
-    def get_parsed_lines(self):
-        return self.lines
+    def get_parsed_files(self):
+        return self.parsed_files
 
 
 
@@ -62,32 +67,46 @@ class Translator():
 
     def __init__(self, parser):
         self.parser = parser
-        self.lines = parser.get_parsed_lines()
+        self.parsed_files = parser.get_parsed_files()
         self.file_name = parser.get_new_filename()
 
         self.num_of_function_calls = 0
         self.inside_function = False
-        self.curr_function = ""
+        self.curr_function = None
+        self.curr_file = None
+        self.total_num_of_lines = 0
 
 
     def push_instruction(self, line, random):
         segment = line[1]
-        position = int(line[2]) + 5 if segment == "temp" else line[2]
-        position = int(line[2]) + 16 if segment == "static" else position
+
+        # TODO:
+        # static-var will be "filename.vm.3"
+        # remove ".vm" in case it cause problems in future
 
         translated_line = push_instruction[segment].replace("{random}", random)
-        translated_line = translated_line.replace("{position}", str(position))
+        if segment == "static":
+            static_var = self.curr_file + "." + line[2]
+            translated_line = translated_line.replace("{static-var}", static_var)
+        else:
+            position = int(line[2]) + 5 if segment == "temp" else line[2]
+            translated_line = translated_line.replace("{position}", str(position))
+
         this_that = "THIS" if line[2] == "0" else "THAT"
         translated_line = translated_line.replace("{THIS_THAT}", this_that)
         return translated_line
 
     def pop_instruction(self, line, random):
         segment = line[1]
-        position = int(line[2]) + 5 if segment == "temp" else line[2]
-        position = int(line[2]) + 16 if segment == "static" else position
 
         translated_line = pop_instruction[segment].replace("{random}", random)
-        translated_line = translated_line.replace("{position}", str(position))
+        if segment == "static":
+            static_var = self.curr_file + "." + line[2]
+            translated_line = translated_line.replace("{static-var}", static_var)
+        else:
+            position = int(line[2]) + 5 if segment == "temp" else line[2]
+            translated_line = translated_line.replace("{position}", str(position))
+
         this_that = "THIS" if line[2] == "0" else "THAT"
         translated_line = translated_line.replace("{THIS_THAT}", this_that)
         return translated_line
@@ -152,15 +171,19 @@ class Translator():
             f.write(self.init_bootstrap())
             f.write(self.call_function(["call", "Sys.init", "0"]))
 
-            for line in self.lines:
-                translation = self.translate_line(line)
-                f.write(translation)
+            for vm_file in self.parsed_files:
+                self.curr_file = vm_file
 
-        print("Wrote: %d VM instructions to %s" %(len(self.lines), self.file_name))
+                for line in self.parsed_files[vm_file]:
+                    translation = self.translate_line(line)
+                    f.write(translation)
+                    self.total_num_of_lines += 1
+
+        print("Wrote: %d VM instructions to %s" %(self.total_num_of_lines, self.file_name))
 
 
     def translate_line(self, line):
-        print(line)
+        # print(line)
         random = str(uuid.uuid1())
 
         try:
