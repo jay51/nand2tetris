@@ -12,7 +12,9 @@ import subprocess
 if __name__ == "__main__":
 
     pathto_07 = os.path.abspath("..")
-    pathto_emulator = "/home/jay/Downloads/nand2tetris/tools/CPUEmulator.sh"
+    pathto_emulator = input("PATH TO CPUEmulator.sh or use default : ")
+    if(not pathto_emulator):
+        pathto_emulator = "/home/jay/Downloads/nand2tetris/tools/CPUEmulator.sh"
     # pathto_assembler = "/home/jay/Downloads/nand2tetris/tools/Assembler.sh"
     pathto_assembler = "/home/jay/dev/clang/nand2tetris/06/assembler/passembler/assembler.py"
     pathto_vm_translator = "/home/jay/dev/clang/nand2tetris/08/vm-translator/python-vm-translator/vm-translator.py"

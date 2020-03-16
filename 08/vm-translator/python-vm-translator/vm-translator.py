@@ -79,13 +79,9 @@ class Translator():
     def push_instruction(self, line, random):
         segment = line[1]
 
-        # TODO:
-        # static-var will be "filename.vm.3"
-        # remove ".vm" in case it cause problems in future
-
         translated_line = push_instruction[segment].replace("{random}", random)
         if segment == "static":
-            static_var = self.curr_file + "." + line[2]
+            static_var = self.curr_file + line[2]
             translated_line = translated_line.replace("{static-var}", static_var)
         else:
             position = int(line[2]) + 5 if segment == "temp" else line[2]
@@ -100,7 +96,7 @@ class Translator():
 
         translated_line = pop_instruction[segment].replace("{random}", random)
         if segment == "static":
-            static_var = self.curr_file + "." + line[2]
+            static_var = self.curr_file + line[2]
             translated_line = translated_line.replace("{static-var}", static_var)
         else:
             position = int(line[2]) + 5 if segment == "temp" else line[2]
@@ -171,7 +167,7 @@ class Translator():
             f.write(self.call_function(["call", "Sys.init", "0"]))
 
             for vm_file in self.parsed_files:
-                self.curr_file = vm_file
+                self.curr_file = vm_file.replace("vm", "") # <filename.> instead <filename.vm>
 
                 for line in self.parsed_files[vm_file]:
                     translation = self.translate_line(line)
