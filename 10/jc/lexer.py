@@ -3,21 +3,22 @@ import sys
 
 
 keywords = (
-    "let", "if", "return", "class", "method", "function", "string"
+    "let", "if", "return", "class", "method", "function", "string",
     "var", "static", "constructor", "int", "field", "true", "false",
     "else", "null", "this", "void", "char", "while", "do", "boolean"
 )
 
 tokens = keywords + (
-   "SYMBOL", "INTEGER", "STRING", "ID", "NEWLINE", "COMMENT"
+   "SYMBOL", "INTEGER", "STRING", "ID", "KEYWORD", "NEWLINE", "COMMENT"
 )
 
 t_ignore = " \t"
 
+
 def t_ID(t):
     r"[A-Za-z][A-Za-z0-9]*"
     if t.value in keywords:
-        t.type = t.value
+        t.type = "KEYWORD"
     return t
 
 
@@ -42,26 +43,4 @@ def t_error(t):
     t.lexer.skip(1)
 
 
-
-# ---------- UTILS ----------
-
-def get_files():
-    pass
-
-# Tokenize
-def main():
-
-    with open(sys.argv[1], "r") as f:
-        source_code = f.read()
-
-    lexer = lex.lex(debug=0)
-    lexer.input(source_code)
-    tok = lexer.token()
-    while tok:
-        print("token: %s, value: %s" %(tok.type, tok.value))
-        tok = lexer.token()
-
-
-
-if __name__ == "__main__":
-    exit(main())
+lexer = lex.lex(debug=0)
