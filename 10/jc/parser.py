@@ -38,7 +38,7 @@ class Parser():
 
 
     def consume(self, t):
-        if self.curr_token.type == t:
+        if self.curr_token.type in t:
             self.curr_token = self.lexer.token()
         else:
             self.error(t)
@@ -55,8 +55,9 @@ class Parser():
         self.consume("ID")
         self.consume("SYMBOL")
 
-        var_dec_ast = self.parse_var_dec()
+        var_dec_ast = self.parse_class_var_dec()
         subroutine_dec_ast = self.parse_subroutine_dec()
+
 
         self.consume("SYMBOL")
 
@@ -66,18 +67,24 @@ class Parser():
 
 
     # ('static' | 'field') type identifer(',' identifer)* ';'
-    def parse_var_dec(self):
+    def parse_class_var_dec(self):
+        return self.var_dec(("static", "field"))
+
+
+    def parse_subroutine_var_dec(self):
+        return self.var_dec("var")
+
+    def var_dec(self, keywords):
         declarations = []
 
-        while(self.curr_token.value in ("static", "field")):
+        while(self.curr_token.value in keywords):
             access_mod = self.curr_token.value
             self.consume("KEYWORD")
             var_type = self.curr_token.value
-            self.consume("KEYWORD")
+            self.consume(("KEYWORD", "ID"))
             var_name = self.curr_token.value
             self.consume("ID")
             declarations.append(VarDec(access_mod, var_type, var_name))
-
 
             while(self.curr_token.value == ","):
                 self.consume("SYMBOL")
