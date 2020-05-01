@@ -18,7 +18,7 @@ def stage_two(lexer):
     parser = Parser(lexer)
     AST = parser.parse()
     AST.print_var_dec_ast()
-
+    AST.print_subroutine_dec_ast()
     
 
 
