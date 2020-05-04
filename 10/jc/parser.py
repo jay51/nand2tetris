@@ -73,14 +73,25 @@ class VarDec():
     __repr__ = __str__
 
 
+
+class Array():
+    def __init__(self, name, idx):
+        self.name = name
+        self.idx = idx
+
+    def __str__(self):
+        return "Array({}, {})".format(self.name, self.idx)
+
+    __repr__ = __str__
+
+
 class VarDef():
-    def __init__(self, left, array_idx, right):
+    def __init__(self, left, right):
         self.left = left
-        self.array_idx = array_idx
         self.right = right
 
     def __str__(self):
-        return "DefVar({}->{}) isArray:{}".format(self.left, self.right, self.array_idx)
+        return "DefVar({}->{})".format(self.left, self.right)
 
     __repr__ = __str__
 
@@ -269,6 +280,9 @@ class Parser():
             tok = self.curr_token
             self.consume("ID")
 
+            if self.curr_token.value == "[": # function call
+                return self.parse_array(tok)
+
             if self.curr_token.value == "(": # function call
                 return self.parse_func_call(tok)
 
@@ -281,6 +295,13 @@ class Parser():
         # not yet Implemented!
         return NoOp()
 
+
+
+    def parse_array(self, tok):
+       self.consume("SYMBOL")
+       idx = self.expression()
+       self.consume("SYMBOL")
+       return Array(tok.value, idx)
 
 
     def parse_string(self):
@@ -363,19 +384,12 @@ class Parser():
 
 
     def parse_let(self):
-        left = self.curr_token.value
-        array_idx = False
-        self.consume("ID")
-
-        if self.curr_token.value == "[":
-            self.consume("SYMBOL")
-            array_idx = self.expression()
-            self.consume("SYMBOL")
+        left = self.expression()
 
         self.consume("SYMBOL")
         right = self.expression()
         self.consume("SYMBOL") #;
-        return VarDef(left, array_idx, right)
+        return VarDef(left, right)
 
 
     def parse_if(self):
@@ -400,7 +414,10 @@ class Parser():
 
 
     def parse_do(self):
-        return self.expression()
+        expr = self.expression()
+        self.consume("SYMBOL") #;
+        return expr
+
 
     def parse_func_call(self, tok):
         self.consume("SYMBOL")
@@ -410,7 +427,6 @@ class Parser():
             self.consume("SYMBOL")
             arg_list.append(self.expression())
 
-        self.consume("SYMBOL")
         self.consume("SYMBOL")
         return DoCall(Identifier(tok), arg_list)
 
