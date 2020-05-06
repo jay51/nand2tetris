@@ -4,9 +4,7 @@ from lexer import tokens
 class Unite():
     def __init__(self, unite_name, var_dec, subroutine_dec):
         self.unite_name = unite_name
-        # list of var dec
         self.var_dec = var_dec
-        # list of subroutine_dec
         self.subroutine_dec = subroutine_dec
     
     def print_var_dec_ast(self):
@@ -26,6 +24,12 @@ class Unite():
                 print(stat)
 
             print("-------------")
+
+
+    def __str__(self):
+        return "Unit({},  {},  {})".format(self.unite_name, self.var_dec, self.subroutine_dec)
+
+    __repr__ = __str__
 
 
 class Obj():
@@ -160,6 +164,15 @@ class Int():
     __repr__ = __str__
 
 
+class KeyWrod():
+    def __init__(self, token):
+        self.token = token
+        self.value = self.token.value
+
+    def __str__(self):
+        return "KeyWrod({})".format(self.value)
+
+    __repr__ = __str__
 
 class Identifier():
     def __init__(self, token):
@@ -199,8 +212,7 @@ class Parser():
     # class ClassName '{' VarDec* subroutineDec* '}'
     def parse_unite(self):
         self.consume("KEYWORD")
-        unite_name = self.curr_token.value
-        self.consume("ID")
+        unite_name = self.expression()
         self.consume("SYMBOL")
 
         var_dec_ast = self.parse_class_var_dec()
@@ -223,12 +235,9 @@ class Parser():
         declarations = []
 
         while(self.curr_token.value in keywords):
-            access_mod = self.curr_token.value
-            self.consume("KEYWORD")
-            var_type = self.curr_token.value
-            self.consume(("KEYWORD", "ID"))
-            var_name = self.curr_token.value
-            self.consume("ID")
+            access_mod = self.expression()
+            var_type = self.expression()
+            var_name = self.expression()
             declarations.append(VarDec(access_mod, var_type, var_name))
 
             while(self.curr_token.value == ","):
@@ -276,6 +285,9 @@ class Parser():
             return self.parse_string()
         if self.curr_token.type == "INTEGER":
             return self.parse_int()
+        if self.curr_token.type == "KEYWORD":
+            return self.parse_keyword()
+
         if self.curr_token.type == "ID":
             tok = self.curr_token
             self.consume("ID")
@@ -315,6 +327,11 @@ class Parser():
        self.consume("INTEGER")
        return Int(token)
 
+
+    def parse_keyword(self):
+        token = self.curr_token
+        self.consume("KEYWORD")
+        return KeyWrod(token)
 
 
     # (constructor | method | function) (void | type) identifier '(' prameterList ')'
