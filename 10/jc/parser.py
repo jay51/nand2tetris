@@ -17,10 +17,7 @@ class Unite():
             for param in routine.param_list:
                 print(param)
 
-            for var in routine.routine_body[0]:
-                print(var)
-
-            for stat in routine.routine_body[1]:
+            for stat in routine.routine_body:
                 print(stat)
 
             print("-------------")
@@ -185,6 +182,16 @@ class Identifier():
     __repr__ = __str__
 
 
+class Param():
+    def __init__(self, type, value):
+        self.type = type
+        self.value = value
+
+    def __str__(self):
+        return "Param({} {})".format(self.type, self.value)
+
+    __repr__ = __str__
+
 
 class NoOp():
     pass
@@ -242,8 +249,7 @@ class Parser():
 
             while(self.curr_token.value == ","):
                 self.consume("SYMBOL")
-                var_name = self.curr_token.value
-                self.consume("ID")
+                var_name = self.expression()
                 declarations.append(VarDec(access_mod, var_type, var_name))
                 
             self.consume("SYMBOL")
@@ -268,13 +274,21 @@ class Parser():
     def parse_param_list(self):
         param_list = []
         self.consume("SYMBOL")
-        if self.curr_token.type == "KEYWORD":
-            self.consume("KEYWORD") # param type
-            param_list.append(self.expression())
+        if self.curr_token.type in ("KEYWORD", "ID"):
+            param_type = self.curr_token.value
+            self.consume(("KEYWORD", "ID")) # param type
+            param_name = self.curr_token.value
+            param_list.append(Param(param_type, param_name))
+            self.consume("ID")
+
             while(self.curr_token.value == ","):
                 self.consume("SYMBOL")
-                self.consume("KEYWORD")
-                param_list.append(self.expression())
+
+                param_type = self.curr_token.value
+                self.consume(("KEYWORD", "ID")) # param type
+                param_name = self.curr_token.value
+                param_list.append(Param(param_type, param_name))
+                self.consume("ID")
 
         self.consume("SYMBOL")
         return param_list
@@ -292,7 +306,7 @@ class Parser():
             tok = self.curr_token
             self.consume("ID")
 
-            if self.curr_token.value == "[": # function call
+            if self.curr_token.value == "[": # array indexing
                 return self.parse_array(tok)
 
             if self.curr_token.value == "(": # function call
@@ -339,15 +353,13 @@ class Parser():
     def parse_subroutine_dec(self):
         subroutines = []
         while(self.curr_token.value in ("constructor", "method", "function")):
-            routine_type = self.curr_token.value
-            self.consume("KEYWORD")
-            ret_type = self.curr_token.value
-            self.consume(("KEYWORD", "ID"))
-            routine_name = self.curr_token.value
+            routine_type = self.expression()
+            ret_type = self.expression()
+            routine_name = Identifier(self.curr_token)
             self.consume("ID")
             param_list = self.parse_param_list()
             self.consume("SYMBOL") # {
-            routine_body = [ self.parse_subroutine_var_dec(), self.parse_statements() ]
+            routine_body = [ *self.parse_subroutine_var_dec(), *self.parse_statements() ]
             self.consume("SYMBOL") # }
 
             subroutines.append(

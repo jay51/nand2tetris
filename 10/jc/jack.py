@@ -34,8 +34,11 @@ class CodeGen(NodeVisitor):
             self.visit(var_node)
             print("</class VarDec>")
 
-        # for routine in node.subroutine_dec:
-            # self.visit(routine)
+        for routine in node.subroutine_dec:
+            print("<subroutineDec>")
+            self.visit(routine)
+            print("</subroutineDec>")
+
         print("</class>")
 
 
@@ -58,6 +61,41 @@ class CodeGen(NodeVisitor):
 
     def visit_Int(self, node):
         return "<int> {} </int>".format(node.value)
+
+    def visit_Param(self, node):
+        return "<param> {} {} </param>".format(node.type, node.value)
+
+    def visit_Param(self, node):
+        return "<param> {} {} </param>".format(node.type, node.value)
+
+    def visit_VarDec(self, node):
+        print("\t\t<varDec>")
+        print("\t\t", self.visit(node.access_modifier))
+        print("\t\t", self.visit(node.type))
+        print("\t\t", self.visit(node.name))
+        print("\t\t</varDec>")
+
+
+    def visit_SubroutineDec(self, node):
+        print("\t", self.visit(node.routine_type))
+        print("\t", self.visit(node.ret_type))
+        print("\t", self.visit(node.routine_name))
+
+        print("<parameterList>")
+        for param in node.param_list:
+            print("\t", self.visit(param))
+        print("</parameterList>")
+
+
+        print("<subroutineBody>")
+        print("\t<statements>")
+        #print(node.routine_body)
+        for stmt in node.routine_body:
+            self.visit(stmt)
+        print("\t</statements>")
+        print("</subroutineBody>")
+
+
 
 
 
