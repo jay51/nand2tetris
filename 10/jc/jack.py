@@ -96,17 +96,66 @@ class CodeGen(NodeVisitor):
         print("</subroutineBody>")
 
 
+    def visit_VarDef(self, node):
+        print("<letStatement>")
+        print("\t", self.visit(node.left))
+        print("\t", self.visit(node.right))
+        print("</letStatement>")
 
+
+    def visit_Obj(self, node):
+        print("\t<ObjExpression>")
+        print("\t\t", node.name)
+        # print("\t\t", node.properity)
+        self.visit(node.properity)
+        print("\t</ObjExpression>")
+
+
+    def visit_DoCall(self, node):
+        print("\t", self.visit(node.id))
+        print("\t<expressionList>")
+        for arg in node.arg_list:
+            print("\t\t", self.visit(arg))
+        print("\t</expressionList>")
+
+
+
+
+    def visit_WhileStatement(self, node):
+        print("\t<WhileStatement>")
+        print("\t<expression>")
+        print("\t\t", self.visit(node.expression))
+        print("\t</expression>")
+
+        print("\t<statements>")
+        for stmt in node.body:
+            self.visit(stmt)
+        print("\t</statements>")
+
+        print("\t</WhileStatement>")
+
+
+
+    def visit_Array(self, node):
+        print("\t<Array>")
+        print("\t\t {}[{}]".format(node.name, self.visit(node.idx)))
+        print("\t</Array>")
+
+
+    def visit_Return(self, node):
+        print("\t<Return>")
+        print("\t\t", self.visit(node.ret_value))
+        print("\t</Return>")
+
+
+    def visit_NoOp(self, node):
+        pass
 
 
 
     def run(self):
         if self.tree:
             return self.visit(self.tree)
-
-
-
-
 
 
 
@@ -149,8 +198,8 @@ def main():
         source_code = f.read()
 
     lexer.input(source_code)
-    # stage_two(lexer)
-    stage_three(lexer)
+    stage_two(lexer)
+    # stage_three(lexer)
 
     # stage_one(source_code)
 
