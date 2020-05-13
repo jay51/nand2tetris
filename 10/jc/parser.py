@@ -61,6 +61,31 @@ class DoCall():
     __repr__ = __str__
 
 
+class BinOp():
+    def __init__(self, left, op, right):
+        self.left = left
+        self.op = op
+        self.right = right
+
+    def __str__(self):
+        return "BinOp({}, {}, {})".format(self.left, self.op, self.right)
+
+    __rper__ = __str__
+
+
+
+class UnaryOp():
+    def __init__(self, op, expr):
+        self.op = op
+        self.expr = expr
+
+    def __str__(self):
+        return "UnaryOp({}, {})".format(self.op, self.expr)
+
+    __rper__ = __str__
+
+
+
 
 class VarDec():
     def __init__(self, access_modifier, var_type, var_name):
@@ -294,7 +319,59 @@ class Parser():
         return param_list
 
 
+
+
+    def factor(self):
+
+        token = self.curr_token
+
+        if(self.curr_token.value in ("+", "-")):
+            self.consume("SYMBOL")
+            node = UnaryOp(token, self.factor())
+            return node
+
+        if(self.curr_token.type == "INTEGER"):
+            self.consume("INTEGER")
+            return Int(token)
+
+        if(self.curr_token.value == "("):
+            self.consume("SYMBOL")
+            node = self.expr()
+            self.consume("SYMBOL")
+            return node
+
+        else:
+            node = self.expression()
+            return node
+
+
+
+    def term(self):
+        node = self.factor()
+        while(self.curr_token.value in ("*", "/")):
+            token = self.curr_token
+            self.consume("SYMBOL")
+
+            node = BinOp(node, token, self.factor())
+        return node
+
+
+
+
+    def expr(self):
+        node = self.term()
+        while(self.curr_token.value in ("+", "-", ">", "<")):
+            token = self.curr_token
+            self.consume("SYMBOL")
+
+            node = BinOp(left=node, op=token, right=self.term())
+
+        return node
+
+
+
     def expression(self):
+
         if self.curr_token.type == "STRING":
             return self.parse_string()
         if self.curr_token.type == "INTEGER":
@@ -323,9 +400,13 @@ class Parser():
 
 
 
+
+
+
+
     def parse_array(self, tok):
        self.consume("SYMBOL")
-       idx = self.expression()
+       idx = self.expr()
        self.consume("SYMBOL")
        return Array(tok.value, idx)
 
@@ -416,14 +497,14 @@ class Parser():
         left = self.expression()
 
         self.consume("SYMBOL")
-        right = self.expression()
+        right = self.expr()
         self.consume("SYMBOL") #;
         return VarDef(left, right)
 
 
     def parse_if(self):
         self.consume("SYMBOL")
-        if_expr = self.expression()
+        if_expr = self.expr()
         self.consume("SYMBOL")
         self.consume("SYMBOL") #{
         body = self.parse_statements()
@@ -434,7 +515,7 @@ class Parser():
 
     def parse_while(self):
         self.consume("SYMBOL")
-        while_expr = self.expression()
+        while_expr = self.expr()
         self.consume("SYMBOL")
         self.consume("SYMBOL") #{
         body = self.parse_statements()
@@ -451,10 +532,10 @@ class Parser():
     def parse_func_call(self, tok):
         self.consume("SYMBOL")
         arg_list = []
-        arg_list.append(self.expression())
+        arg_list.append(self.expr())
         while(self.curr_token.value == ","):
             self.consume("SYMBOL")
-            arg_list.append(self.expression())
+            arg_list.append(self.expr())
 
         self.consume("SYMBOL")
         return DoCall(Identifier(tok), arg_list)
