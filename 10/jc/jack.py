@@ -148,6 +148,14 @@ class CodeGen(NodeVisitor):
         print("\t</Return>")
 
 
+
+    def visit_BinOp(self, node):
+        print("\t", self.visit(node.left))
+        print("\t <Operator> {} </Operator>".format(node.op.value))
+        print("\t", self.visit(node.right))
+
+
+
     def visit_NoOp(self, node):
         pass
 
@@ -198,8 +206,8 @@ def main():
         source_code = f.read()
 
     lexer.input(source_code)
-    stage_two(lexer)
-    # stage_three(lexer)
+    # stage_two(lexer)
+    stage_three(lexer)
 
     # stage_one(source_code)
 
