@@ -1,5 +1,6 @@
-from lexer import lexer
 import sys
+import os
+from lexer import lexer
 from parser import Parser
 
 
@@ -197,19 +198,39 @@ def stage_three(lexer):
 
 
 
-def get_files():
-    pass
 
-# tokenize
+
 def main():
-    with open(sys.argv[1], "r") as f:
-        source_code = f.read()
+    if not len(sys.argv) == 2:
+        sys.stderr.write("Usage: jack <file_name.jack>\n\tjack <dir_name>\n")
+        sys.exit(2)
 
-    lexer.input(source_code)
-    # stage_two(lexer)
-    stage_three(lexer)
+    jakc_files = None
+    path = sys.argv[1:]
 
-    # stage_one(source_code)
+    if(path[0].endswith(".jack")):
+        jack_files = path[0].split(".")[0] + ".jack"
+    else:
+        jack_files = [path[0] + f for f in os.walk(path[0]).__next__()[2] if f.endswith(".jack")]
+
+
+    vm_files = [ f.replace(".jack", ".vm") for f in jack_files ]
+    print(jack_files)
+    print(vm_files)
+
+
+
+
+
+    for source_file in jack_files:
+        with open(source_file, "r") as f:
+            source_code = f.read()
+
+        lexer.input(source_code)
+        # stage_two(lexer)
+        stage_three(lexer)
+
+        # stage_one(source_code)
 
 
 
